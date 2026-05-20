@@ -1,0 +1,134 @@
+---
+title: "Brand configuration: colors, fonts, and logo"
+description: "Configure colors, fonts, logo, and base font size in _brand/_brand.yml to apply your practice's visual identity to every rendered report."
+---
+
+Every Luria Voice project reads branding settings from `_brand/_brand.yml` at render time. Changes you make to this file take effect the next time you run `quarto render` — no restart required. The sections below explain each configuration area and the values you can set.
+
+## Colors
+
+Define your practice's primary and secondary palette using hex values. The `primary` color is used for headings and accents; `secondary` is used for subheadings and highlight elements.
+
+```yaml _brand/_brand.yml
+color:
+  primary: "#2C5F8A"
+  secondary: "#4A90C4"
+  background: "#FFFFFF"
+```
+
+<Note>
+Keep `background` set to `#FFFFFF` for clinic-ready print output. Colored backgrounds can cause issues when printing to PDF or when the report is photocopied.
+</Note>
+
+## Typography
+
+The `typography` block controls which fonts are loaded, the base body size, and heading weight.
+
+```yaml _brand/_brand.yml
+typography:
+  fonts:
+    - family: Equity B
+      source: file
+    - family: IBM Plex Sans
+      source: google
+    - family: JetBrains Mono
+      source: google
+  base-size: 11pt
+  headings:
+    weight: 600
+```
+
+### Preferred fonts
+
+| Font | Use | Source |
+|---|---|---|
+| Equity B | Body text | Local file (must be installed) |
+| IBM Plex Sans | UI / sans headings | Google Fonts (auto-downloaded) |
+| JetBrains Mono | Code blocks | Google Fonts (auto-downloaded) |
+
+<Tip>
+Install Equity B locally for the best typographic results. If the font is not found on your system, Typst falls back gracefully to IBM Plex Serif and then to system fonts. The report will still render — it just won't use the preferred typeface.
+</Tip>
+
+### Fallback behavior
+
+The Typst show rules in `_extensions/neurotyp-adult/typst-show.typ` define a font priority list:
+
+1. Equity B
+2. IBM Plex Sans / IBM Plex Serif
+3. Source Sans 3
+4. System default serif
+
+You do not need to change `typst-show.typ` to use fallback fonts — Typst selects them automatically when a preferred font is missing.
+
+### Base size
+
+`base-size` controls the body text point size. `11pt` is the default and is appropriate for standard A4 clinical reports. Increase to `12pt` if the report will be read by patients with visual impairments.
+
+## Logo
+
+Place your practice logo in the `_brand/` directory and reference it by path.
+
+```yaml _brand/_brand.yml
+logo:
+  images:
+    - path: logo.png
+      alt: Practice logo
+```
+
+<Steps>
+  <Step title="Add your logo file">
+    Copy your logo image into the `_brand/` directory. PNG format at 300 dpi is recommended for sharp PDF output.
+  </Step>
+  <Step title="Update the path">
+    Set `path` to the filename of your logo. The path is relative to `_brand/`.
+  </Step>
+  <Step title="Set descriptive alt text">
+    Update `alt` with a short description, such as your practice name. This is used for accessibility metadata in the PDF.
+  </Step>
+  <Step title="Render to see the result">
+    Run `quarto render template.qmd` to apply your logo. It appears in the report header on page 1.
+  </Step>
+</Steps>
+
+<Warning>
+Do not reference images outside the project directory (for example, absolute paths like `/Users/you/Desktop/logo.png`). Use paths relative to `_brand/` so the project remains portable across machines.
+</Warning>
+
+## Full annotated example
+
+The following is a complete `_brand/_brand.yml` with inline comments explaining each field.
+
+```yaml _brand/_brand.yml
+color:
+  # Primary accent color — used for main headings
+  primary: "#2C5F8A"
+  # Secondary accent — subheadings and decorative elements
+  secondary: "#4A90C4"
+  # Page background — keep white for print
+  background: "#FFFFFF"
+
+typography:
+  fonts:
+    # Preferred serif body font; must be installed locally
+    - family: Equity B
+      source: file
+    # Sans-serif UI font; downloaded from Google Fonts at render
+    - family: IBM Plex Sans
+      source: google
+    # Monospace font for code listings
+    - family: JetBrains Mono
+      source: google
+  # Body text size in points
+  base-size: 11pt
+  headings:
+    # Font weight for all heading levels (400 = regular, 600 = semibold, 700 = bold)
+    weight: 600
+
+logo:
+  images:
+    # Path relative to _brand/
+    - path: logo.png
+      # Alt text for accessibility metadata
+      alt: Practice logo
+```

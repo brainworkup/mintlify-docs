@@ -1,0 +1,194 @@
+---
+title: "Configure patient metadata in template.qmd"
+description: "Reference for every YAML front matter field in template.qmd, including multi-session dates, the CONFIDENTIAL header, and auto-updating report dates."
+---
+
+Every Luria Voice report begins with a YAML front matter block at the top of `template.qmd`. These fields populate the report's cover page, the running CONFIDENTIAL header on interior pages, and anywhere else the template references patient or case identifiers. Getting this block right before you render ensures all identifying information is consistent throughout the document.
+
+## Full front matter example
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Rivera
+name: Rivera, Maria
+dob: "1978-06-22"
+age: 46
+doe: "2025-04-07"
+doe2: "2025-04-14"
+doe3: "2025-04-21"
+date_of_report: last-modified
+case_number: "2025-042"
+---
+```
+
+## Field reference
+
+### `title`
+
+The report title printed at the top of the cover page. Most clinicians use one of the following standard values:
+
+```yaml
+title: NEUROCOGNITIVE EXAMINATION
+```
+
+```yaml
+title: NEUROPSYCHOLOGICAL EVALUATION
+```
+
+```yaml
+title: PSYCHOEDUCATIONAL ASSESSMENT
+```
+
+There are no formatting restrictions, but convention is all-caps to match the typeset heading style in the Typst template.
+
+---
+
+### `patient`
+
+The patient's last name only. This value appears in the CONFIDENTIAL header that runs across the top of every page after the cover page.
+
+```yaml
+patient: Rivera
+```
+
+<Note>
+  The `patient` field is intentionally limited to the last name so the header remains compact. The full name is handled separately by the `name` field.
+</Note>
+
+---
+
+### `name`
+
+The patient's full name in **Last, First** format. This appears on the cover page and in the patient demographics section.
+
+```yaml
+name: Rivera, Maria
+```
+
+Keep the format consistent — the Typst template expects the comma-separated Last, First convention.
+
+---
+
+### `dob`
+
+Date of birth in ISO 8601 format (`YYYY-MM-DD`). Always quote this value to prevent YAML from interpreting it as a date object.
+
+```yaml
+dob: "1978-06-22"
+```
+
+---
+
+### `age`
+
+Patient age in whole years at the time of the evaluation. Enter this as a plain integer — no quotes required.
+
+```yaml
+age: 46
+```
+
+<Tip>
+  Use the age as of the **first evaluation date** (`doe`) for consistency, especially in multi-session evaluations where a birthday might fall between sessions.
+</Tip>
+
+---
+
+### `doe`, `doe2`, `doe3` — Evaluation dates
+
+Luria Voice supports evaluations conducted across one, two, or three sessions. Use `doe` for the first session and add `doe2` and `doe3` only if additional sessions occurred.
+
+<Tabs>
+  <Tab title="Single session">
+    ```yaml
+    doe: "2025-04-07"
+    ```
+  </Tab>
+  <Tab title="Two sessions">
+    ```yaml
+    doe: "2025-04-07"
+    doe2: "2025-04-14"
+    ```
+  </Tab>
+  <Tab title="Three sessions">
+    ```yaml
+    doe: "2025-04-07"
+    doe2: "2025-04-14"
+    doe3: "2025-04-21"
+    ```
+  </Tab>
+</Tabs>
+
+All date values must be quoted strings in ISO 8601 format. The template renders only the fields you provide — if you omit `doe3`, that date will not appear in the report.
+
+<Warning>
+  Do not leave `doe2` or `doe3` set to placeholder dates if those sessions did not actually occur. Either remove the fields entirely or comment them out to avoid incorrect dates appearing in the final report.
+</Warning>
+
+---
+
+### `date_of_report`
+
+Controls the date shown on the report's cover page. Set it to `last-modified` to have Quarto automatically use the file's last modification timestamp, or enter a fixed ISO 8601 date string.
+
+<Tabs>
+  <Tab title="Auto-update on render">
+    ```yaml
+    date_of_report: last-modified
+    ```
+  </Tab>
+  <Tab title="Fixed date">
+    ```yaml
+    date_of_report: "2025-04-28"
+    ```
+  </Tab>
+</Tabs>
+
+Using `last-modified` is recommended for most workflows because the date automatically reflects when you last rendered the report, reducing the chance of a stale date slipping through.
+
+---
+
+### `case_number`
+
+Your clinic or practice's internal case identifier. Always quote this value to preserve leading zeros and hyphens.
+
+```yaml
+case_number: "2025-042"
+```
+
+This field appears on the cover page alongside other case metadata. It is not used by any computation inside the report — it is purely for identification and record-keeping.
+
+---
+
+## CONFIDENTIAL header behavior
+
+The Typst template automatically places a CONFIDENTIAL header at the top of every page after the cover page. The header reads:
+
+```
+CONFIDENTIAL — [patient last name]
+```
+
+The `patient` field in your front matter supplies the last name in this header. If `patient` is missing or empty, the header will render without a name, which can cause compliance issues in clinical settings.
+
+<Warning>
+  Always set `patient` before rendering a final report. A missing or incorrect patient name in the CONFIDENTIAL header may affect document validity under your jurisdiction's privacy regulations.
+</Warning>
+
+## Complete minimal example
+
+If you are running a single-session evaluation and want the simplest valid front matter block:
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Okafor
+name: Okafor, Chidi
+dob: "1985-11-03"
+age: 39
+doe: "2025-05-01"
+date_of_report: last-modified
+case_number: "2025-058"
+---
+```
+
+Every other field (`doe2`, `doe3`) is optional and can be added when needed.

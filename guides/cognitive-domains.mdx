@@ -1,0 +1,200 @@
+---
+title: "Add cognitive domain findings to Luria Voice reports"
+description: "Build modular .qmd domain partials, wire them into your report with _domains_to_include.qmd, and use cingulate to load and visualize score data."
+---
+
+Cognitive domain findings in Luria Voice are not written inline inside `template.qmd`. Instead, each cognitive domain lives in its own `.qmd` partial file — a self-contained fragment of Quarto markdown that holds prose, R code, score tables, and figures for that domain. The report assembles these partials at render time through a single include file called `_domains_to_include.qmd`. This modular structure makes it easy to add, remove, or reuse domain sections across different report types.
+
+## How partial includes work in Quarto
+
+Quarto's `{{< include >}}` shortcode pastes the contents of another `.qmd` file directly into the parent document before rendering. It is equivalent to writing all that content inline, but stored in a separate file.
+
+In `template.qmd`, the cognitive domain section looks like this:
+
+```markdown
+{{< include _domains_to_include.qmd >}}
+```
+
+And `_domains_to_include.qmd` is itself just a list of further includes:
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _verbal-memory.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _executive.qmd >}}
+```
+
+When Quarto renders the report, it recursively expands all includes in order before passing anything to Typst. The final PDF contains all domain sections in the sequence they appear in `_domains_to_include.qmd`.
+
+## Create `_domains_to_include.qmd`
+
+The template scaffolds a starter `_domains_to_include.qmd` for you. Open it and edit the list to match the domains you actually assessed.
+
+<Tabs>
+  <Tab title="Manual selection">
+    List only the domains relevant to this evaluation. Remove or comment out any domains not administered.
+
+    ```markdown
+    {{< include _neurocognitive.qmd >}}
+    {{< include _verbal-memory.qmd >}}
+    {{< include _attention.qmd >}}
+    ```
+  </Tab>
+  <Tab title="Full battery">
+    For a comprehensive evaluation including all standard domains:
+
+    ```markdown
+    {{< include _neurocognitive.qmd >}}
+    {{< include _verbal-memory.qmd >}}
+    {{< include _visual-memory.qmd >}}
+    {{< include _attention.qmd >}}
+    {{< include _executive.qmd >}}
+    {{< include _language.qmd >}}
+    {{< include _visuospatial.qmd >}}
+    {{< include _academics.qmd >}}
+    {{< include _adaptive.qmd >}}
+    {{< include _emotional.qmd >}}
+    ```
+  </Tab>
+  <Tab title="cingulate pipeline">
+    If you are using the `cingulate` R package pipeline, it can generate `_domains_to_include.qmd` automatically based on the tests detected in your data. Run the pipeline first, then render the report without manually editing the include file.
+
+    ```r
+    library(cingulate)
+    # Generate domain include file from scored data
+    generate_domain_includes(data_dir = "data/")
+    ```
+
+    Check the generated `_domains_to_include.qmd` before rendering to confirm the correct domains were detected.
+  </Tab>
+</Tabs>
+
+<Warning>
+  Every file referenced in `_domains_to_include.qmd` must exist in your project directory. Quarto will error out at render time if a referenced partial is missing. Either create the missing file or remove its `{{< include >}}` line.
+</Warning>
+
+## Anatomy of a domain partial file
+
+Each domain partial follows the same structure: a section heading, optional narrative prose, and one or more R code chunks that load data and produce output using the `cingulate` package.
+
+Here is a complete example for the neurocognitive functioning domain. A domain partial starts with a section heading, optional narrative prose, and R code chunks.
+
+**Section heading and narrative prose** (`_neurocognitive.qmd`):
+
+```markdown
+## Neurocognitive Functioning
+
+Maria's overall neurocognitive profile showed relative strengths in processing
+speed and working memory, with more variable performance across measures of
+novel problem-solving and cognitive flexibility.
+```
+
+**Score table chunk** (add after the narrative):
+
+```r
+#| label: neurocog-table
+#| echo: false
+#| message: false
+library(cingulate)
+
+# Load processed score data for this domain
+neurocog_data <- load_domain_data("neurocognitive")
+
+# Render a formatted score table
+render_score_table(neurocog_data)
+```
+
+**Score visualization chunk** (add after the table):
+
+```r
+#| label: neurocog-plot
+#| echo: false
+#| fig-width: 7
+#| fig-height: 3
+
+# Render a ggplot2 score visualization
+plot_domain_scores(neurocog_data)
+```
+
+### Key conventions
+
+- **Section heading**: Use `##` (H2) so the domain appears as a top-level section in the report's table of contents.
+- **chunk labels**: Give every code chunk a unique `label`. Duplicate labels across partials will cause a render error.
+- **`echo: false`**: Always set this so raw R code does not appear in the PDF output.
+- **Data loading**: Use `cingulate::load_domain_data()` with the domain name matching your data directory conventions.
+
+## Create a new domain partial from scratch
+
+If the template does not include a partial for a domain you need, create one manually.
+
+<Steps>
+  <Step title="Create the file">
+    Create a new `.qmd` file in your project directory. Use the naming convention `_DOMAIN-NAME.qmd`, for example `_processing-speed.qmd`.
+
+    ```bash
+    touch _processing-speed.qmd
+    ```
+
+  </Step>
+
+  <Step title="Add the section heading and narrative">
+    Open the file and add a `##` heading and your clinical narrative for this domain.
+
+    ```markdown
+    ## Processing Speed
+
+    Performance on timed measures of processing speed fell within the average
+    range, consistent with age-referenced norms.
+    ```
+  </Step>
+
+  <Step title="Add R code chunks for score data">
+    Add code chunks that load and visualize the score data using `cingulate`. In your `.qmd` partial, add an R chunk like the following:
+
+    ```r
+    #| label: processing-speed-table
+    #| echo: false
+    #| message: false
+    library(cingulate)
+
+    ps_data <- load_domain_data("processing_speed")
+    render_score_table(ps_data)
+    ```
+  </Step>
+
+  <Step title="Register the partial in _domains_to_include.qmd">
+    Add an include line to `_domains_to_include.qmd` at the position where you want this domain to appear in the report.
+
+    ```markdown
+    {{< include _neurocognitive.qmd >}}
+    {{< include _processing-speed.qmd >}}
+    {{< include _attention.qmd >}}
+    ```
+  </Step>
+
+  <Step title="Render and verify">
+    Run `quarto render` and confirm the new domain section appears in the correct position in the PDF.
+
+    ```bash
+    quarto render template.qmd --to neurotyp-adult-typst
+    ```
+  </Step>
+</Steps>
+
+## Using the cingulate pipeline to auto-generate includes
+
+The `cingulate` package can inspect your scored data directory and automatically produce a `_domains_to_include.qmd` that lists only the domains for which data is present.
+
+```r
+library(cingulate)
+
+# Point to the directory containing your scored CSV or RDS files
+generate_domain_includes(
+  data_dir  = "data/",
+  output    = "_domains_to_include.qmd"
+)
+```
+
+<Note>
+  Auto-generation does not create the domain partial files themselves — only the include list. You still need a corresponding `_[domain].qmd` file for each domain detected. The template provides starters for all standard domains; the pipeline only selects which ones to activate.
+</Note>

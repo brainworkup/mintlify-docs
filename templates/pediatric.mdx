@@ -1,0 +1,97 @@
+---
+title: "neurotyp-pediatric: pediatric evaluation template"
+description: "Install and render the neurotyp-pediatric extension for age-appropriate pediatric neuropsychological evaluation PDFs with developmental section ordering."
+---
+
+The `neurotyp-pediatric` extension generates PDF evaluation reports designed for pediatric neuropsychological assessments. Its layout and heading treatment reflect the conventions of developmental neuropsychology — section ordering, label language, and visual hierarchy are calibrated for child and adolescent evaluations rather than adapted from an adult template.
+
+## Install the extension
+
+<Tabs>
+  <Tab title="New project">
+    Run this command in an empty directory. Quarto scaffolds the full project structure, including `_extensions/`, `_brand/`, and `template.qmd`.
+
+    ```bash
+    quarto use template brainworkup/neurotyp-pediatric
+    ```
+
+    Quarto will ask you to confirm the directory name. Accept the default or enter a patient-specific folder name such as `2025-doe-jane/`.
+  </Tab>
+  <Tab title="Existing project">
+    Add the extension to a project that already has a `_quarto.yml` or `template.qmd`.
+
+    ```bash
+    quarto add brainworkup/neurotyp-pediatric
+    ```
+
+    Then update the `format` key in your `template.qmd` front matter:
+
+    ```yaml
+    format: neurotyp-pediatric-typst
+    ```
+  </Tab>
+</Tabs>
+
+## Render a report
+
+```bash
+quarto render template.qmd --to neurotyp-pediatric-typst
+```
+
+To preview the report in a browser-based viewer while you edit:
+
+```bash
+quarto preview template.qmd
+```
+
+To update the extension after a new release:
+
+```bash
+quarto update extension brainworkup/neurotyp-pediatric
+```
+
+## Configure the report
+
+Open `template.qmd` and fill in the patient's metadata in the YAML front matter block.
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Doe
+name: Doe, Jane
+dob: "2012-06-20"
+age: 12
+doe: "2025-03-10"
+doe2: "2025-03-11"
+date_of_report: last-modified
+case_number: "2025-042"
+format: neurotyp-pediatric-typst
+---
+```
+
+See [Front matter reference](/templates/front-matter) for a description of every field.
+
+## Pediatric-specific formatting
+
+The `neurotyp-pediatric` extension differs from the adult format in the following ways:
+
+- **Heading treatment** — section headings use a slightly adjusted weight and spacing suited to developmental evaluation report conventions.
+- **Section ordering** — cognitive domain sections are ordered to reflect the sequence commonly used in pediatric batteries (attention and working memory precede executive function and processing speed).
+- **Label language** — section labels use developmentally appropriate terminology (for example, "Learning and Memory" rather than "Memory and New Learning").
+
+<Note>
+  The Typst source files for pediatric formatting live in `_extensions/neurotyp-pediatric/typst-template.typ` and `_extensions/neurotyp-pediatric/typst-show.typ`. See [Typst layout and typography reference](/templates/typst-formatting) before modifying these files directly.
+</Note>
+
+## Add cognitive domain sections
+
+The master `template.qmd` uses Quarto `include` shortcodes to pull in domain-specific partial files. Edit `_domains_to_include.qmd` to select the sections relevant to this patient.
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive_function.qmd >}}
+```
+
+See [Modular section partials](/templates/section-partials) for a full walkthrough.

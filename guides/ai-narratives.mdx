@@ -1,0 +1,158 @@
+---
+title: "Draft clinical narratives with Ollama and cingulate"
+description: "Set up Ollama locally, pull a language model, and use the cingulate package to draft neuropsychological narrative text from test score data."
+---
+
+Luria Voice includes optional integration with [Ollama](https://ollama.com), a tool for running large language models locally. When Ollama is running on your machine, the `cingulate` R package can use it to generate first-draft narrative text for each cognitive domain based on the score data you have already loaded. This can reduce the time spent on initial write-ups, but all AI-generated text must be reviewed and edited by a licensed clinician before inclusion in any report.
+
+<Warning>
+  AI-generated narratives are drafts only. They may contain errors, hallucinations, or clinically inappropriate language. A qualified neuropsychologist must review, revise, and take full professional responsibility for all narrative content before it appears in a finalized report.
+</Warning>
+
+## How the integration works
+
+When `cingulate` is loaded in an R session, it checks whether Ollama is reachable at `localhost:11434`. If it is, narrative generation functions become available. If Ollama is not running, all other `cingulate` functions (data loading, tables, plots) continue to work normally — the AI features are entirely opt-in.
+
+There is no API key or cloud service involved. All model inference happens on your local machine, which means patient data never leaves your environment.
+
+## Step 1: Install Ollama
+
+Download and install Ollama from [ollama.com](https://ollama.com). Follow the installer for your operating system. After installation, start the Ollama service:
+
+<Tabs>
+  <Tab title="macOS / Linux">
+    ```bash
+    ollama serve
+    ```
+
+    Ollama will listen on `localhost:11434` by default.
+  </Tab>
+  <Tab title="Windows">
+    Launch the Ollama application from the Start menu or system tray. It starts the local server automatically.
+  </Tab>
+</Tabs>
+
+## Step 2: Pull a language model
+
+Pull a model suited for clinical text generation. `llama3` is a good general-purpose starting point; larger models produce higher-quality output at the cost of more RAM and slower generation.
+
+```bash
+ollama pull llama3
+```
+
+<Tabs>
+  <Tab title="Lightweight (8 GB RAM)">
+    ```bash
+    ollama pull llama3
+    ```
+  </Tab>
+  <Tab title="Higher quality (16+ GB RAM)">
+    ```bash
+    ollama pull llama3:70b
+    ```
+  </Tab>
+  <Tab title="List available models">
+    ```bash
+    ollama list
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  You only need to pull a model once. It is stored locally and reused on subsequent runs.
+</Note>
+
+## Step 3: Enable narrative generation in your report
+
+In the setup chunk at the top of `template.qmd`, load `cingulate`. No additional configuration is needed — the package detects Ollama automatically.
+
+```r
+library(cingulate)
+# Ollama is detected automatically at localhost:11434
+# If Ollama is not running, all non-AI features still work normally
+```
+
+## Step 4: Generate a domain narrative
+
+Inside a domain partial (for example, `_attention.qmd`), call `generate_narrative()` after loading score data. The function returns a character string of draft narrative text.
+
+```r
+#| label: attention-narrative
+#| echo: false
+#| message: false
+library(cingulate)
+
+attn_data <- load_domain_data("attention")
+
+# Generate a draft narrative paragraph for this domain
+draft_text <- generate_narrative(
+  domain_data = attn_data,
+  domain      = "attention",
+  model       = "llama3"
+)
+
+# Write the draft to the document
+cat(draft_text)
+```
+
+<Tip>
+  Pipe the output of `generate_narrative()` through `cat()` so Quarto renders it as prose rather than a quoted R string. Using `message: false` suppresses progress output from Ollama during rendering.
+</Tip>
+
+## Customizing the prompt
+
+You can pass a custom system prompt to `generate_narrative()` to adjust the model's tone, length, or clinical framing:
+
+```r
+draft_text <- generate_narrative(
+  domain_data   = attn_data,
+  domain        = "attention",
+  model         = "llama3",
+  system_prompt = "You are a licensed neuropsychologist writing a formal
+                   evaluation report for referral to a specialist. Use
+                   precise clinical language. Limit the response to
+                   three sentences."
+)
+```
+
+## Checking Ollama connection status
+
+If you are unsure whether Ollama is running, you can check the connection from R before attempting narrative generation:
+
+```r
+library(cingulate)
+
+if (ollama_is_available()) {
+  message("Ollama is running. Narrative generation is available.")
+} else {
+  message("Ollama not detected. Skipping narrative generation.")
+}
+```
+
+Use this pattern in domain partials if you want the report to render correctly regardless of whether Ollama is running:
+
+```r
+#| label: attention-narrative
+#| echo: false
+library(cingulate)
+
+attn_data <- load_domain_data("attention")
+
+if (ollama_is_available()) {
+  draft_text <- generate_narrative(attn_data, domain = "attention")
+  cat(draft_text)
+}
+```
+
+## Workflow recommendation
+
+Using AI narratives most effectively in practice:
+
+1. Run `quarto render` once with Ollama active to generate all domain narrative drafts.
+2. Read each draft carefully and mark areas requiring correction or expansion.
+3. Edit the narratives directly in the `.qmd` partial files, replacing or supplementing the AI output with your clinical judgment.
+4. Re-render the final report with your edited prose in place.
+
+<Note>
+  You do not need to call `generate_narrative()` on every render. Once you have edited the draft text and placed it directly in the `.qmd` file as plain prose, you can remove or disable the narrative generation code chunk entirely.
+</Note>

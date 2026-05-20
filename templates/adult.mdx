@@ -1,0 +1,110 @@
+---
+title: "neurotyp-adult: adult evaluation report template"
+description: "Install and render the neurotyp-adult extension (v0.2.0) for professional adult neuropsychological evaluation PDFs with SIRF summary and CONFIDENTIAL headers."
+---
+
+The `neurotyp-adult` extension is the primary production-ready template in the Luria Voice ecosystem. At version 0.2.0 it is the most field-tested format, used for standard adult neuropsychological evaluations covering cognitive domains from intelligence and attention through memory, executive function, and language.
+
+## Install the extension
+
+<Tabs>
+  <Tab title="New project">
+    Run this command in an empty directory. Quarto scaffolds the full project — `_extensions/`, `_brand/`, and `template.qmd` — ready to edit.
+
+    ```bash
+    quarto use template brainworkup/neurotyp-adult
+    ```
+
+    Quarto asks for a directory name. Use a patient- or date-keyed name such as `2025-smith-john/` to keep cases organised on disk.
+  </Tab>
+  <Tab title="Existing project">
+    Add the extension to an existing Quarto project.
+
+    ```bash
+    quarto add brainworkup/neurotyp-adult
+    ```
+
+    Then set the format in your `template.qmd` front matter:
+
+    ```yaml
+    format: neurotyp-adult-typst
+    ```
+  </Tab>
+</Tabs>
+
+## Render a report
+
+```bash
+quarto render template.qmd --to neurotyp-adult-typst
+```
+
+To preview while editing:
+
+```bash
+quarto preview template.qmd
+```
+
+To pull in the latest release:
+
+```bash
+quarto update extension brainworkup/neurotyp-adult
+```
+
+## Configure the report
+
+Open `template.qmd` and fill in the patient's front matter.
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Smith
+name: Smith, John
+dob: "1978-09-04"
+age: 46
+doe: "2025-04-07"
+doe2: "2025-04-08"
+date_of_report: last-modified
+case_number: "2025-019"
+format: neurotyp-adult-typst
+---
+```
+
+See [Front matter reference](/templates/front-matter) for every supported field and what it controls in the rendered PDF.
+
+## Adult-specific formatting
+
+The `neurotyp-adult` extension applies formatting conventions suited to standard clinical evaluation reports for adult patients:
+
+- **CONFIDENTIAL header** — pages 2 and beyond automatically print the patient's last name (`patient:` field) and the report date in a confidential page header.
+- **A4 page geometry** — 30 mm top margin, 25 mm side margins, with justified body text.
+- **Centered title** — the level-0 heading (report title) renders centered on the first page.
+- **Typography** — body text uses Equity B; headers use IBM Plex Sans. The font stack falls back gracefully to system fonts when the preferred faces are not installed.
+
+<Tip>
+  If you need to switch an existing adult report to the pediatric format, change one line — `format: neurotyp-pediatric-typst` — and re-render. The front matter schema is identical across formats.
+</Tip>
+
+## Add cognitive domain sections
+
+Edit `_domains_to_include.qmd` to include only the domains assessed for this patient.
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive_function.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _language.qmd >}}
+```
+
+See [Modular section partials](/templates/section-partials) for a full explanation of the include pattern and how to create domain-specific partial files.
+
+## Typst source files
+
+The extension's layout and typography are defined in two files:
+
+| File | Controls |
+|---|---|
+| `_extensions/neurotyp-adult/typst-template.typ` | Page size, margins, CONFIDENTIAL header, footer |
+| `_extensions/neurotyp-adult/typst-show.typ` | Font stacks, heading styles, body text alignment |
+
+See [Typst layout and typography reference](/templates/typst-formatting) before editing either file directly.

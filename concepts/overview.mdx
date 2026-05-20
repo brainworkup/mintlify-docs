@@ -1,0 +1,79 @@
+---
+title: "How Luria Voice works: the rendering pipeline"
+description: "Tour the Neurotyp ecosystem: Quarto extensions, Typst rendering, and the cingulate R package — every layer fits together to produce clinic-ready PDFs."
+---
+
+Luria Voice is a framework that turns structured Quarto Markdown into polished, clinic-ready neuropsychological evaluation PDFs. You write `.qmd` source files that mix prose, R or Python code, and patient data; Quarto executes the code, then hands off the composed document to Typst, which renders a precisely formatted PDF in seconds. The ecosystem is named after Alexander Luria, the Soviet neuropsychologist whose process-oriented approach to assessment underpins the report design.
+
+## Ecosystem components
+
+<CardGroup cols={2}>
+  <Card title="Quarto extensions" icon="puzzle">
+    Four format-specific extensions (`neurotyp-adult`, `neurotyp-pediatric`, `neurotyp-forensic`, `neurotyp-luria`) each supply a Typst template and show rules tailored to their report type. You activate one by setting it as the output format in your `.qmd` front matter.
+  </Card>
+  <Card title="Typst rendering layer" icon="file-type-pdf">
+    The `style` repository holds all Quarto extensions and acts as the central rendering layer. Typst replaces LaTeX for PDF generation — it is faster to compile, easier to debug, and produces consistent typography without complex package management.
+  </Card>
+  <Card title="cingulate R package" icon="chart-bar">
+    `cingulate` handles data ingestion from neuropsychological test batteries, computes scaled scores and percentile ranks, generates plots, and optionally drafts narrative text via a local Ollama backend. Its output feeds directly into the report's cognitive domain sections.
+  </Card>
+  <Card title="Brand and theming" icon="palette">
+    The `_brand/` directory in each extension project holds `_brand.yml`, which centralizes clinic colors, preferred fonts, and logo placement. Changing a brand file updates all pages without touching the Typst template directly.
+  </Card>
+</CardGroup>
+
+## How the rendering pipeline works
+
+The following steps describe what happens from the moment you run `quarto render` to when the PDF lands on disk.
+
+<Steps>
+  <Step title="Quarto reads the master template">
+    Quarto reads `template.qmd` (or your patient-specific `.qmd` file), parses the YAML front matter to determine the output format (e.g., `neurotyp-adult-typst`), and resolves the correct extension from `_extensions/`.
+  </Step>
+  <Step title="R/Python code chunks execute">
+    Quarto runs any embedded R or Python chunks — typically calls to the `cingulate` package that load test scores, compute statistics, and produce score tables or figures. The results are embedded in the document as data frames, plots, or inline values.
+  </Step>
+  <Step title="Section partials are included">
+    Cognitive domain findings live in separate `.qmd` partial files (for example, `_domains_to_include.qmd`). Quarto resolves these `{{< include >}}` directives, assembling a single unified document tree.
+  </Step>
+  <Step title="Quarto converts to Typst source">
+    Quarto's Pandoc engine converts the assembled Markdown and code outputs into a `.typ` source file, injecting the extension's `typst-template.typ` (page geometry, headers, margins) and `typst-show.typ` (typography show rules, heading styles).
+  </Step>
+  <Step title="Typst compiles to PDF">
+    Typst compiles the `.typ` source to a final PDF. Compilation is fast — typically under two seconds for a full report — and the output is deterministic, meaning the same source always produces the same PDF.
+  </Step>
+  <Step title="PDF is ready for clinical use">
+    The rendered PDF meets clinic formatting standards: A4 page, 30 mm top margin, 25 mm side margins, a `CONFIDENTIAL` running header on pages 2 and beyond, and justified body text. You distribute or archive the file directly.
+  </Step>
+</Steps>
+
+## Why Quarto + Typst?
+
+<Note>
+  The choice of Quarto and Typst is intentional and complementary. Neither tool alone would satisfy all the requirements of a clinical reporting workflow.
+</Note>
+
+Quarto provides the scientific computing layer: you can execute R or Python code inside the document, which means test scores, percentile tables, and cognitive domain plots are computed and embedded automatically rather than copied by hand. Quarto also handles multi-format output from a single source, so the same `.qmd` file could render to HTML for review and PDF for delivery.
+
+Typst provides the typographic precision layer. Unlike LaTeX, Typst has a readable scripting syntax, compiles in milliseconds rather than seconds, and produces predictable output without intermediate auxiliary files. The `neurotyp` extensions encode all formatting decisions — margins, fonts, heading treatment, confidentiality headers — in Typst show rules, keeping the `.qmd` source clean of layout concerns.
+
+## Optional AI-assisted narrative generation
+
+The `cingulate` package includes an optional integration with [Ollama](https://ollama.com), a local large-language model runner. When enabled, Ollama drafts narrative paragraphs for each cognitive domain based on the computed scores. These drafts are inserted into the report as starting points for clinician review and editing — they are not intended for use without clinical oversight.
+
+<Warning>
+  AI-generated narrative text requires clinical review before inclusion in any patient document. The Ollama integration is a drafting aid, not a substitute for clinician interpretation.
+</Warning>
+
+## Repository layout
+
+The Neurotyp ecosystem is spread across several repositories, each with a distinct responsibility.
+
+| Repository | Role |
+|---|---|
+| `neurotyp-adult` | Quarto extension + Typst template for adult evaluations |
+| `neurotyp-pediatric` | Quarto extension + Typst template for pediatric evaluations |
+| `neurotyp-forensic` | Quarto extension + Typst template for forensic evaluations |
+| `neurotyp-luria` | Quarto extension + Typst template for LLM-templated patient reports |
+| `style` | Central rendering layer; hosts all extensions |
+| `cingulate` | R package for data processing, plotting, and AI narrative drafting |

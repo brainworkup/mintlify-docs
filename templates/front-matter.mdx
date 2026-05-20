@@ -1,0 +1,95 @@
+---
+title: "YAML front matter reference for Luria Voice reports"
+description: "Complete reference for every YAML front matter field in Luria Voice templates: patient metadata, evaluation dates, case identifiers, and format."
+---
+
+Every Luria Voice report begins with a YAML front matter block in `template.qmd`. These fields drive the content that appears in the rendered PDF: the patient name in the CONFIDENTIAL page header, the evaluation dates in the report body, and the case number in your records. The front matter schema is identical across all four template formats.
+
+## Complete example
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Doe
+name: Doe, Jane
+dob: "1980-01-15"
+age: 45
+doe: "2025-03-10"
+doe2: "2025-03-11"
+doe3: "2025-03-12"
+date_of_report: last-modified
+case_number: "2025-001"
+format: neurotyp-adult-typst
+---
+```
+
+## Field reference
+
+### Report metadata
+
+<ParamField path="title" type="string" required>
+  The report title, rendered as a centered level-0 heading on the first page. Use all-caps by convention: `NEUROCOGNITIVE EXAMINATION`, `FORENSIC NEUROPSYCHOLOGICAL EVALUATION`, etc. This text does not appear in the CONFIDENTIAL page header.
+</ParamField>
+
+<ParamField path="format" type="string" required>
+  The Quarto output format. Must match one of the four installed extensions:
+
+  - `neurotyp-adult-typst`
+  - `neurotyp-pediatric-typst`
+  - `neurotyp-forensic-typst`
+  - `neurotyp-luria-typst`
+</ParamField>
+
+<ParamField path="case_number" type="string">
+  Your practice or clinic's internal case identifier. This value appears in the report for record-keeping purposes. Use a consistent format across your practice — for example, `"2025-001"` or `"2025-F-008"` for forensic referrals. Enclose in quotes to prevent YAML from parsing it as a number.
+</ParamField>
+
+### Patient identity
+
+<ParamField path="patient" type="string" required>
+  The patient's last name only. This value populates the CONFIDENTIAL page header on pages 2 and beyond: `CONFIDENTIAL — Doe — 2025-03-10`. Use the last name rather than the full name to keep the header concise.
+</ParamField>
+
+<ParamField path="name" type="string" required>
+  The patient's full name in Last, First format: `Doe, Jane`. This value appears in the report body and demographic table. The comma-separated Last, First format is required — it is not reformatted by the template.
+</ParamField>
+
+<ParamField path="dob" type="string" required>
+  The patient's date of birth in ISO 8601 format: `"1980-01-15"`. Enclose in quotes to ensure YAML treats the value as a string rather than a date object. The template displays this value as-is in the demographic section.
+</ParamField>
+
+<ParamField path="age" type="number" required>
+  The patient's age in whole years at the time of evaluation. Enter this value as an integer: `45`. If the patient has a birthday between evaluation sessions, use the age at the first session.
+</ParamField>
+
+### Evaluation dates
+
+<ParamField path="doe" type="string" required>
+  The date of the first evaluation session in ISO 8601 format: `"2025-03-10"`. "doe" stands for date of evaluation. This date also appears in the CONFIDENTIAL page header. Enclose in quotes.
+</ParamField>
+
+<ParamField path="doe2" type="string">
+  The date of the second evaluation session: `"2025-03-11"`. Include this field only if a second session occurred. Omit it entirely if the evaluation was completed in one session — do not set it to an empty string or null.
+</ParamField>
+
+<ParamField path="doe3" type="string">
+  The date of the third evaluation session: `"2025-03-12"`. Include only if a third session occurred. Most evaluations do not require this field.
+</ParamField>
+
+<ParamField path="date_of_report" type="string" default="last-modified">
+  Controls the date displayed as the report date. Set to `last-modified` (the default) and Quarto automatically updates it to the date of the most recent render. Alternatively, supply an explicit ISO 8601 date string such as `"2025-04-01"` to lock the report date regardless of when you re-render.
+</ParamField>
+
+## Notes on formatting
+
+<Note>
+  Enclose all date fields in double quotes. YAML parsers sometimes interpret bare date strings such as `2025-03-10` as date objects rather than strings, which can cause rendering errors.
+</Note>
+
+<Tip>
+  Keep `date_of_report: last-modified` during drafting. Switch to an explicit date — `date_of_report: "2025-04-01"` — only when you sign and finalise the report so that subsequent re-renders do not silently change the date on a signed document.
+</Tip>
+
+<Warning>
+  The `patient:` field (last name only) feeds the CONFIDENTIAL header on every page of the PDF. Verify the spelling before rendering a final report — correcting it requires a re-render.
+</Warning>

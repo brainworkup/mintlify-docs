@@ -1,0 +1,99 @@
+---
+title: "Neuropsychological report structure and sections"
+description: "How Luria Voice organizes evaluation reports into nine sections, what belongs in each, and how modular .qmd partials keep cognitive domain content manageable."
+---
+
+Every report rendered by Luria Voice follows the same nine-section structure regardless of which format you choose. Understanding that structure helps you know where to put patient information, how the `cingulate` pipeline feeds data into the document, and what the final PDF will contain. The sections are assembled from a master `.qmd` template that pulls in partial files for the sections that vary between patients.
+
+## The nine report sections
+
+<Steps>
+  <Step title="Patient demographics and case metadata" titleSize="h3">
+    The opening section identifies the patient and establishes the clinical context. It includes the patient's full name, date of birth, age at evaluation, gender, referral source, dates of evaluation, and the evaluating clinician's name and credentials. This data comes from YAML front matter in the master `.qmd` file and is injected into the Typst header and first page automatically.
+
+    <Tip>
+      Patient name and evaluation date from this section are also used to populate the `CONFIDENTIAL` running header that appears on pages 2 and beyond.
+    </Tip>
+  </Step>
+  <Step title="Tests administered" titleSize="h3">
+    A structured list of every neuropsychological instrument used in the evaluation — including standardized tests, rating scales, structured interviews, and record reviews. You maintain this list as a Markdown table or enumerated list in the master template. It provides the evidentiary foundation for the findings that follow.
+  </Step>
+  <Step title="Neurological symptom evaluation (NSE) narrative" titleSize="h3">
+    The NSE narrative is a clinician-authored prose section that describes the patient's presenting neurological and psychiatric symptoms as reported by the patient, caregivers, or referring providers. It contextualizes the quantitative test findings within the patient's symptom history.
+
+    If you use the Ollama integration in `cingulate`, the AI backend can generate a draft NSE narrative based on structured symptom input. Review and revise any AI-drafted content before finalizing the report.
+  </Step>
+  <Step title="Behavioral observations" titleSize="h3">
+    This section documents the clinician's direct observations of the patient during the evaluation session — appearance, affect, cooperation, attention, effort, and any factors that may have affected test validity. It is written in prose and typically runs one to three paragraphs.
+  </Step>
+  <Step title="Cognitive domain findings" titleSize="h3">
+    The cognitive domain findings section is the heart of the report. It presents quantitative results for each assessed domain (e.g., attention, memory, executive function, language, visuospatial ability, processing speed) alongside interpretive narrative.
+
+    These findings are **not written inline in the master template**. Instead, each domain is a separate `.qmd` partial file that you include with a `{{< include >}}` directive. See [Modular section partials](#modular-section-partials) below for details.
+  </Step>
+  <Step title="Summary, impressions, recommendations, and findings (SIRF)" titleSize="h3">
+    The SIRF section synthesizes the entire evaluation into a clinician-facing narrative. See [What goes in the SIRF](#what-goes-in-the-sirf) below for the breakdown of each component.
+  </Step>
+  <Step title="Clinical recommendations" titleSize="h3">
+    An enumerated list of specific, actionable recommendations tied to the findings — referrals, accommodations, treatment targets, follow-up evaluations, or educational interventions. Recommendations should map directly to the diagnostic impressions in the SIRF.
+  </Step>
+  <Step title="Clinician signature block" titleSize="h3">
+    The closing block includes the clinician's name, credentials, license number, institution or practice name, and a signature line. In the Typst template this block is positioned at the bottom of the final content page.
+  </Step>
+  <Step title="Appendices" titleSize="h3">
+    Optional appendices contain supporting materials — full score tables, additional plots, consent forms, or test-specific technical notes. Appendices are included as additional `.qmd` partials or raw Markdown sections appended after the signature block.
+  </Step>
+</Steps>
+
+---
+
+## Modular section partials
+
+Cognitive domain findings vary substantially between patients, and maintaining all domains inline in a single long `.qmd` file becomes unwieldy. Luria Voice solves this with **section partials**: separate `.qmd` files, one per cognitive domain, that you include into the master template with a Quarto include directive.
+
+```qmd _domains_to_include.qmd
+{{< include _attention.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive.qmd >}}
+{{< include _language.qmd >}}
+{{< include _visuospatial.qmd >}}
+{{< include _processing-speed.qmd >}}
+```
+
+Each partial is a self-contained document fragment. It may contain prose narrative, R/Python code chunks that pull data from the `cingulate` pipeline, score tables, and plots. Only include partials for domains that were actually assessed in the evaluation.
+
+<Note>
+  The `cingulate` R package can generate domain partial files automatically from test score data. The generated partials include pre-computed tables and plots, with optional AI-drafted narrative paragraphs that you revise before rendering.
+</Note>
+
+### Benefits of the partial approach
+
+- **Patient-specific assembly**: you include only the domain files relevant to the current patient's referral question.
+- **Reusable content**: a carefully edited domain narrative can be reused and adapted across patients with similar profiles.
+- **Parallel development**: different clinicians or pipeline stages can produce domain files independently before final assembly.
+- **Version control clarity**: changes to one domain partial do not touch any other section of the report.
+
+---
+
+## What goes in the SIRF
+
+SIRF stands for **Summary, Impressions, Recommendations, and Findings**. It is a single integrated section — not four separate headings — that brings the evaluation to a clinical conclusion.
+
+<Tabs>
+  <Tab title="Summary">
+    A brief synthesis (one to three paragraphs) of the most salient findings across all assessed cognitive domains. The summary is written for a clinical audience and should connect the quantitative results to the patient's real-world functioning and presenting concerns. Avoid restating individual scores; instead, describe patterns and their significance.
+  </Tab>
+  <Tab title="Impressions">
+    The clinician's diagnostic impressions, stated using DSM-5-TR or ICD-11 diagnostic language where applicable. Impressions should be supported by the findings documented in the cognitive domain section and the NSE narrative. Include differential diagnostic considerations if relevant.
+  </Tab>
+  <Tab title="Recommendations">
+    Specific, prioritized recommendations derived from the diagnostic impressions. Recommendations appear in the SIRF as a conceptual bridge before the detailed Clinical Recommendations section (section 7). In the SIRF, frame recommendations at the level of goals; in section 7, provide the actionable specifics.
+  </Tab>
+  <Tab title="Findings">
+    A structured list or brief narrative of the key positive and negative findings that inform the impressions. This subsection grounds the impressions in the data and provides a quick reference for readers who want to audit the clinical reasoning without re-reading all domain sections.
+  </Tab>
+</Tabs>
+
+<Warning>
+  The SIRF is the section most likely to be read in isolation by referral sources, school teams, or insurance reviewers. Write it so it stands on its own without requiring the reader to consult the domain sections.
+</Warning>

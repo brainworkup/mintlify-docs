@@ -1,0 +1,156 @@
+---
+title: "Write your first neuropsychological evaluation report"
+description: "Scaffold the Luria Voice template, configure patient metadata, add clinical observations, and render a polished neuropsychological PDF in minutes."
+---
+
+Luria Voice gives you a pre-structured Quarto project wired to a Typst PDF template. This guide walks you through every step from scaffolding a new report to opening the finished PDF — no prior Quarto or Typst experience required.
+
+## Prerequisites
+
+Before you start, make sure the following are installed:
+
+- [Quarto](https://quarto.org/docs/get-started/) 1.4 or later
+- [R](https://www.r-project.org/) 4.3 or later with the `cingulate` package (`remotes::install_github("brainworkup/cingulate")`)
+- A PDF viewer (any will do)
+
+<Steps>
+  <Step title="Scaffold the template">
+    Run the following command in the directory where you want to create your report project. Quarto will download the `neurotyp-adult` extension and copy the starter files into a new folder.
+
+    ```bash
+    quarto use template brainworkup/neurotyp-adult
+    ```
+
+    When prompted, enter a directory name for your project (for example, `doe-jane-2025`). After the command completes, your project folder will contain:
+
+    ```
+    doe-jane-2025/
+    ├── template.qmd          # Main report document
+    ├── _quarto.yml           # Quarto project settings
+    ├── _brand/
+    │   └── _brand.yml        # Colors and typography
+    ├── _domains_to_include.qmd
+    └── _extensions/
+        └── neurotyp-adult/   # Typst template files
+    ```
+  </Step>
+
+  <Step title="Open template.qmd">
+    Open `template.qmd` in your editor. The top of the file contains the YAML front matter block, which controls all patient metadata and report settings.
+
+    You will see placeholder values like this:
+
+    ```yaml
+    ---
+    title: NEUROCOGNITIVE EXAMINATION
+    patient: Doe
+    name: Doe, Jane
+    dob: "1980-01-15"
+    age: 45
+    doe: "2025-03-10"
+    doe2: "2025-03-11"
+    doe3: "2025-03-12"
+    date_of_report: last-modified
+    case_number: "2025-001"
+    ---
+    ```
+
+    Replace each placeholder with the actual patient information for this evaluation. See [Configure patient metadata](/guides/patient-metadata) for a full reference of every field.
+  </Step>
+
+  <Step title="Configure front matter for your patient">
+    Update the front matter with accurate case details. A completed example for a real evaluation looks like this:
+
+    ```yaml
+    ---
+    title: NEUROCOGNITIVE EXAMINATION
+    patient: Rivera
+    name: Rivera, Maria
+    dob: "1978-06-22"
+    age: 46
+    doe: "2025-04-07"
+    date_of_report: last-modified
+    case_number: "2025-042"
+    ---
+    ```
+
+    <Note>
+      If the evaluation took place across multiple sessions, add `doe2` and optionally `doe3` fields. Only include the fields that correspond to actual evaluation dates.
+    </Note>
+  </Step>
+
+  <Step title="Add behavioral observations">
+    Scroll down in `template.qmd` to find the **Behavioral Observations** section. Replace the placeholder text with your own clinical observations.
+
+    ```markdown
+    ## Behavioral Observations
+
+    Maria presented as cooperative and engaged throughout both evaluation sessions.
+    She arrived on time, was appropriately dressed, and maintained adequate eye
+    contact. Speech was fluent and coherent. She reported mild anxiety at the
+    start of testing, which appeared to diminish as the session progressed.
+    Effort was judged to be adequate based on embedded validity indicators.
+    ```
+
+    <Tip>
+      Write this section directly in the `.qmd` file using plain Markdown. You do not need any special Quarto or R syntax here — just prose.
+    </Tip>
+  </Step>
+
+  <Step title="Select cognitive domains to include">
+    Open `_domains_to_include.qmd`. This file controls which domain-specific score sections appear in the report. Add or remove `{{< include >}}` directives to match the tests you administered.
+
+    ```markdown
+    {{< include _neurocognitive.qmd >}}
+    {{< include _verbal-memory.qmd >}}
+    {{< include _attention.qmd >}}
+    ```
+
+    For a detailed explanation of how domain partials work, see [Add cognitive domain findings](/guides/cognitive-domains).
+  </Step>
+
+  <Step title="Render the report to PDF">
+    From the terminal, navigate to your project directory and run:
+
+    ```bash
+    quarto render template.qmd --to neurotyp-adult-typst
+    ```
+
+    Quarto compiles the `.qmd` file, runs all R code chunks, passes the output to the Typst template, and produces a PDF alongside your source file.
+
+    <CodeGroup>
+
+    ```bash Render to PDF (Typst)
+    quarto render template.qmd --to neurotyp-adult-typst
+    ```
+
+    ```bash Render to HTML (preview)
+    quarto render template.qmd
+    ```
+
+    </CodeGroup>
+
+    <Warning>
+      Rendering requires all referenced domain partial files to exist. If `_domains_to_include.qmd` references a file that does not exist in the project directory, Quarto will throw an error and stop.
+    </Warning>
+  </Step>
+
+  <Step title="Review the output PDF">
+    Open `template.pdf` in your PDF viewer. Check the following before submitting or printing:
+
+    - Patient name, date of birth, and case number are correct on page 1
+    - The CONFIDENTIAL header on pages 2 and beyond shows the correct patient last name
+    - All evaluation dates are accurate
+    - Score tables and figures rendered correctly in each domain section
+    - The SIRF section (Summary, Impressions, Recommendations & Findings) is complete
+
+    If you need to make corrections, edit `template.qmd` and re-run `quarto render`.
+  </Step>
+</Steps>
+
+## Next steps
+
+- [Configure patient metadata](/guides/patient-metadata) — detailed reference for all front matter fields
+- [Add cognitive domain findings](/guides/cognitive-domains) — build out modular domain sections
+- [Generate AI-assisted narratives](/guides/ai-narratives) — use Ollama to draft narrative text
+- [Customize report typography and layout](/guides/customizing-output) — adjust colors, fonts, and page layout

@@ -1,0 +1,133 @@
+---
+title: "Choose the right Luria Voice report format"
+description: "Compare the four Luria Voice formats — pediatric, adult, forensic, and luria — and learn which to use based on patient population and referral context."
+---
+
+Luria Voice ships four distinct report formats, each packaged as its own Quarto extension. Choosing the right format before you start a report matters because the formats differ in typography, page treatment, heading style, and the clinical framing they imply. You activate a format by setting the `format` key in your `.qmd` front matter, and you cannot switch formats mid-project without re-rendering from scratch.
+
+## Format comparison
+
+| | `neurotyp-pediatric-typst` | `neurotyp-adult-typst` | `neurotyp-forensic-typst` | `neurotyp-luria-typst` |
+|---|---|---|---|---|
+| **Patient age** | Children and adolescents | Adults (18+) | Any, court-ordered | Any, LLM-templated |
+| **Referral context** | School, developmental, clinical | Clinical, occupational, medical | Legal, civil, criminal | Research, prototype, AI-drafted |
+| **Page size** | A4 | A4 | A4 | A4 |
+| **Body font** | IBM Plex Serif | Equity B | Equity B | IBM Plex Serif |
+| **UI/label font** | IBM Plex Sans | IBM Plex Sans | Source Sans 3 | IBM Plex Sans |
+| **Mono font** | JetBrains Mono | JetBrains Mono | JetBrains Mono | JetBrains Mono |
+| **Heading treatment** | Centered, lighter weight | Centered, regular weight | Left-aligned, heavier weight | Centered, lighter weight |
+| **CONFIDENTIAL header** | Pages 2+ | Pages 2+ | Every page | Pages 2+ |
+| **Signature block** | Standard | Standard | Extended (license + date) | Minimal |
+| **AI narrative support** | Optional | Optional | Not recommended | Primary use case |
+
+<Note>
+  All formats fall back gracefully if a preferred font is not installed. The rendering still produces a clean PDF; only the typeface changes.
+</Note>
+
+---
+
+## neurotyp-pediatric-typst
+
+`neurotyp-pediatric-typst` is designed for evaluations of children and adolescents referred for learning disabilities, ADHD, developmental disorders, autism spectrum conditions, and related concerns. The typography leans slightly lighter and more approachable than the adult format — IBM Plex Serif for body text reads well at smaller sizes and produces a less dense page, which is appropriate when the report may be read by school teams or parents as well as clinicians.
+
+```yaml template.qmd (front matter)
+---
+format: neurotyp-pediatric-typst
+---
+```
+
+Use this format when:
+
+- The patient is under 18
+- The referral source is a school, pediatric practice, or developmental clinic
+- The report will be shared with educational teams or parents
+- The evaluation covers learning, attention, development, or behavior
+
+<Tip>
+  Pediatric reports often include school accommodation recommendations. Use the Clinical Recommendations section (section 7) to list specific IEP or 504 plan accommodations supported by the findings.
+</Tip>
+
+---
+
+## neurotyp-adult-typst
+
+`neurotyp-adult-typst` is the standard format for adult clinical neuropsychological evaluations. It uses Equity B for body text, which has a stronger typographic presence than IBM Plex Serif and reads as authoritative in medical and clinical contexts. Headings are centered and set in regular weight, balancing formality with readability.
+
+```yaml template.qmd (front matter)
+---
+format: neurotyp-adult-typst
+---
+```
+
+Use this format when:
+
+- The patient is 18 or older
+- The referral is from a neurologist, psychiatrist, primary care provider, or employer
+- The evaluation covers cognitive decline, TBI sequelae, psychiatric conditions, or occupational capacity
+- The report will be read primarily by clinical or medical professionals
+
+---
+
+## neurotyp-forensic-typst
+
+`neurotyp-forensic-typst` is built for evaluations conducted in legal and forensic contexts — civil litigation, criminal proceedings, competency evaluations, disability determinations, and similar high-stakes assessments. The format signals its purpose through several design differences: Source Sans 3 replaces IBM Plex Sans for a more neutral, institutional tone; headings are left-aligned and set in heavier weight for easy navigation by attorneys and judges; and the `CONFIDENTIAL` header appears on every page, not just pages 2 and beyond.
+
+The extended signature block includes the clinician's full license number, the jurisdiction in which they are licensed, the date of the report, and space for a wet or digital signature.
+
+```yaml template.qmd (front matter)
+---
+format: neurotyp-forensic-typst
+---
+```
+
+Use this format when:
+
+- The evaluation was ordered by a court or attorney
+- The report will be entered as evidence or appended to legal filings
+- You need to document chain-of-custody considerations or test administration deviations
+- The signature block must carry full licensure and jurisdiction information
+
+<Warning>
+  Do not use AI-assisted narrative drafting (the Ollama integration) for forensic reports. AI-generated text is not appropriate in contexts where the clinician may be deposed or cross-examined about their reasoning process.
+</Warning>
+
+---
+
+## neurotyp-luria-typst
+
+`neurotyp-luria-typst` is the format purpose-built for LLM-templated patient reports. Where the other three formats treat AI narrative generation as an optional add-on, `neurotyp-luria` treats it as the primary authoring mode. The extension is designed to work with the `cingulate` package's Ollama backend to produce a full draft report from structured score data, which the clinician then edits and refines.
+
+The typography matches the pediatric format (IBM Plex Serif body, IBM Plex Sans labels) and the signature block is minimal, reflecting that reports in this format are expected to go through substantial clinician revision before finalization.
+
+```yaml template.qmd (front matter)
+---
+format: neurotyp-luria-typst
+---
+```
+
+Use this format when:
+
+- You are building a research pipeline that generates draft reports from structured data
+- You want to prototype a new report type before formalizing it into one of the other three formats
+- You are developing or testing AI-drafted narrative sections with `cingulate` and Ollama
+- The report is an internal working document rather than a patient-facing deliverable
+
+<Warning>
+  Reports rendered with `neurotyp-luria-typst` carry a minimal signature block by design — they are drafts. Promote a finalized luria-format report to `neurotyp-adult-typst` or another format before delivering it to patients, referral sources, or legal parties.
+</Warning>
+
+---
+
+## Selecting a format in practice
+
+<Tabs>
+  <Tab title="Clinical evaluation">
+    For routine clinical evaluations, choose between `neurotyp-pediatric-typst` and `neurotyp-adult-typst` based solely on the patient's age. Both formats are appropriate for any clinical referral question — learning, attention, memory, TBI, psychiatric, or occupational.
+  </Tab>
+  <Tab title="Forensic evaluation">
+    Always use `neurotyp-forensic-typst` for any evaluation that may enter a legal proceeding or be reviewed by attorneys, courts, or administrative law judges. Do not use the adult or pediatric formats for forensic work, even if the patient's age would otherwise suggest them.
+  </Tab>
+  <Tab title="AI-assisted drafting">
+    Use `neurotyp-luria-typst` for any report where you want the `cingulate` Ollama pipeline to generate the initial draft. After editing and finalizing the content, change the `format` key to the clinically appropriate format and re-render before delivery.
+  </Tab>
+</Tabs>

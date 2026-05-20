@@ -1,0 +1,195 @@
+---
+title: "Troubleshoot Luria Voice render and setup errors"
+description: "Diagnose and fix the most frequent Luria Voice render failures, from missing includes and font warnings to Ollama timeouts and extension errors."
+---
+
+Most Luria Voice render failures fall into a small set of recognizable patterns. Each section below describes the exact symptom you will see, explains what causes it, and gives the steps to resolve it.
+
+<AccordionGroup>
+  <Accordion title="Missing include: _domains_to_include.qmd">
+    **Symptom:** Quarto stops rendering and reports an error similar to:
+
+    ```
+    ERROR: Missing include: _domains_to_include.qmd
+    ```
+
+    **Cause:** `template.qmd` uses a `{{< include >}}` directive that expects a file named `_domains_to_include.qmd` in your project root. This file lists the cognitive domain partials that make up the body of the report. It is not shipped with the template because its contents depend on the specific test battery you administered.
+
+    **Fix:** Create `_domains_to_include.qmd` manually, or generate it using the `cingulate` pipeline.
+
+    To create it manually, add one `{{< include >}}` line per domain partial you want to include:
+
+    ```markdown _domains_to_include.qmd
+    {{< include _memory.qmd >}}
+    {{< include _attention.qmd >}}
+    {{< include _executive.qmd >}}
+    ```
+
+    To generate it with `cingulate`, call the appropriate pipeline function from R before rendering. See the `cingulate` package documentation for details.
+  </Accordion>
+
+  <Accordion title="Font not found / missing Typst fonts">
+    **Symptom:** The report renders successfully but Quarto logs warnings such as:
+
+    ```
+    warning: font not found: Equity B
+    warning: font not found: IBM Plex Serif
+    ```
+
+    The output PDF uses a different typeface than expected.
+
+    **Cause:** Typst could not locate the preferred fonts on your system. Equity B is a commercial font that must be purchased and installed separately. IBM Plex Sans and JetBrains Mono are open-source but may not be installed by default.
+
+    **Fix:** The report will still render using fallback fonts defined in `_extensions/neurotyp-adult/typst-show.typ`. If you need the preferred fonts:
+
+    1. Purchase and install **Equity B** from [practicaltypography.com](https://practicaltypography.com).
+    2. Install **IBM Plex Sans** from Google Fonts or your system font manager.
+    3. Install **JetBrains Mono** from [jetbrains.com/mono](https://www.jetbrains.com/mono/).
+    4. After installing, run `quarto render` again — Typst will find the fonts automatically.
+
+    <Note>
+    You do not need to change any configuration files. Typst searches your system font directories automatically.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Error in library(cingulate)">
+    **Symptom:** R throws an error when loading the package:
+
+    ```
+    Error in library(cingulate) : there is no package called 'cingulate'
+    ```
+
+    **Cause:** The `cingulate` package is not available on CRAN and must be installed from GitHub. A standard `install.packages("cingulate")` call will fail silently or with an error.
+
+    **Fix:** Install `cingulate` from GitHub using the `remotes` package:
+
+    ```r
+    install.packages("remotes")
+    remotes::install_github("brainworkup/cingulate")
+    ```
+
+    After installation completes, restart your R session and run `library(cingulate)` to confirm it loads without error.
+  </Accordion>
+
+  <Accordion title="Quarto version too old">
+    **Symptom:** Quarto reports an unknown format or fails to find the Typst output target:
+
+    ```
+    ERROR: Unknown format: neurotyp-adult-typst
+    ```
+
+    Or rendering fails with Typst-related errors that do not match the extension's source files.
+
+    **Cause:** Luria Voice requires Quarto ≥ 1.4.0, which introduced native Typst support. Earlier versions do not know about the `*-typst` output format suffix.
+
+    **Fix:** Update Quarto to the latest release. Download it from [quarto.org](https://quarto.org) and run the installer. After updating, verify the version:
+
+    ```bash
+    quarto --version
+    ```
+
+    The output must be `1.4.0` or higher.
+  </Accordion>
+
+  <Accordion title="Ollama not responding">
+    **Symptom:** Rendering hangs or fails with a connection error during the AI narrative step:
+
+    ```
+    Error: Failed to connect to localhost:11434
+    ```
+
+    Or the render times out without producing a PDF.
+
+    **Cause:** The AI narrative feature calls a locally running Ollama server at `http://localhost:11434`. If Ollama is not running when `quarto render` executes, the request fails.
+
+    **Fix:** Start Ollama before rendering:
+
+    ```bash
+    ollama serve
+    ```
+
+    Then run `quarto render` in a separate terminal window. Ollama must remain running for the duration of the render.
+
+    <Tip>
+    If you do not need AI narratives for a particular report, you can disable the Ollama-dependent code blocks in `template.qmd` by setting their chunk option to `eval: false`. This lets you render without starting Ollama.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Extension 'neurotyp-adult' not found">
+    **Symptom:** Quarto cannot find the extension:
+
+    ```
+    ERROR: Error: extension 'neurotyp-adult' not found
+    ```
+
+    **Cause:** The `neurotyp-adult` extension is not installed in the current project. Quarto looks for `_extensions/neurotyp-adult/` relative to the directory containing `_quarto.yml`. If you are running `quarto render` from a different directory, or if you have never installed the extension in this project, the lookup fails.
+
+    **Fix:**
+
+    1. Navigate to your project root (the directory that contains `_quarto.yml`):
+
+       ```bash
+       cd /path/to/your/project
+       ```
+
+    2. Install the extension:
+
+       ```bash
+       quarto add brainworkup/neurotyp-adult
+       ```
+
+    3. Confirm the extension directory was created:
+
+       ```bash
+       ls _extensions/neurotyp-adult/
+       ```
+
+    4. Re-run `quarto render`.
+
+    <Warning>
+    Always run `quarto add` and `quarto render` from the same project root directory. Running them from a subdirectory will install or look for the extension in the wrong location.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="Multi-session dates (doe2 / doe3) not showing">
+    **Symptom:** You have set `doe2` and/or `doe3` fields in your YAML front matter, but those dates do not appear in the rendered report header or cover page.
+
+    **Cause:** Multi-session date fields were added in extension version 0.2.0. If your installed extension is older than v0.2.0, the template does not contain the Typst logic to render those fields.
+
+    **Fix:**
+
+    1. Check your extension version in `_extensions/neurotyp-adult/_extension.yml`.
+    2. If the version is below 0.2.0, update the extension:
+
+       ```bash
+       quarto update extension brainworkup/neurotyp-adult
+       ```
+
+    3. Confirm your front matter uses the correct field names:
+
+       ```yaml
+       doe: 2024-09-10
+       doe2: 2024-09-17
+       doe3: 2024-09-24
+       ```
+
+    4. Re-render the report.
+  </Accordion>
+
+  <Accordion title="PDF shows wrong patient name in header">
+    **Symptom:** The CONFIDENTIAL header on pages 2 and later displays the wrong name, a full name instead of a last name, or is missing entirely.
+
+    **Cause:** The header is populated by the `patient` field in YAML front matter, not the `name` field. The `patient` field expects the patient's last name only (for de-identification purposes). If `patient` is absent or set to a full name, the header will reflect that.
+
+    **Fix:** Set the `patient` field in your front matter to the patient's last name only:
+
+    ```yaml
+    ---
+    patient: "Smith"
+    name: "Alex Smith"
+    ---
+    ```
+
+    The `name` field is used elsewhere in the report body. The `patient` field controls the running CONFIDENTIAL header exclusively.
+  </Accordion>
+</AccordionGroup>

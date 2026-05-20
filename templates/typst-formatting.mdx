@@ -1,0 +1,163 @@
+---
+title: "Typst layout, fonts, and typography reference"
+description: "Understand the page layout, margins, CONFIDENTIAL header, font stacks, and typography rules in neurotyp templates — and what you can safely customise."
+---
+
+Each Luria Voice template compiles through Typst, which is bundled inside Quarto. The visual presentation of every report is controlled by two Typst source files inside the `_extensions/` directory. Understanding what each file does — and the boundary between safe customisation and risky modification — will save you time when adjusting layouts for your practice.
+
+## The two Typst files
+
+<CardGroup cols={2}>
+  <Card title="typst-template.typ" icon="layout">
+    Controls page geometry: paper size, margins, header and footer rules, and the CONFIDENTIAL header printed on pages 2 and beyond.
+  </Card>
+  <Card title="typst-show.typ" icon="type">
+    Controls typography show rules: font stacks, heading sizes and weights, body text alignment, and element spacing.
+  </Card>
+</CardGroup>
+
+Both files live inside the extension directory. For `neurotyp-adult` the paths are:
+
+```
+_extensions/neurotyp-adult/typst-template.typ
+_extensions/neurotyp-adult/typst-show.typ
+```
+
+Replace `neurotyp-adult` with `neurotyp-pediatric`, `neurotyp-forensic`, or `neurotyp-luria` for the sibling formats.
+
+## Page layout (`typst-template.typ`)
+
+### Default geometry
+
+| Property | Value |
+|---|---|
+| Paper size | A4 |
+| Top margin | 30 mm |
+| Side margins (left and right) | 25 mm |
+| Bottom margin | 25 mm |
+| Body text alignment | Justified |
+
+### CONFIDENTIAL header
+
+Pages 2 and beyond automatically include a CONFIDENTIAL header. The header is constructed from the `patient` and `doe` front matter fields:
+
+```
+CONFIDENTIAL — Doe — 2025-03-10
+```
+
+The header is defined in `typst-template.typ` as a Typst header rule that fires on all pages except the first. It reads the `patient` and `doe` values passed from the Quarto front matter.
+
+### Changing paper size
+
+To switch from A4 to US Letter, locate the `paper` declaration in `typst-template.typ` and change the value:
+
+```typst
+// Before
+#set page(paper: "a4", ...)
+
+// After
+#set page(paper: "us-letter", ...)
+```
+
+<Warning>
+  Changing the paper size shifts all margin calculations and may reflow text unexpectedly. Render and review the full report after making this change.
+</Warning>
+
+### Adjusting margins
+
+Find the `margin` property inside the `#set page(...)` call:
+
+```typst
+#set page(
+  paper: "a4",
+  margin: (top: 30mm, left: 25mm, right: 25mm, bottom: 25mm),
+  ...
+)
+```
+
+Increase the top margin if you need more space above the CONFIDENTIAL header. Increase side margins if your printer clips content near the edges.
+
+## Typography (`typst-show.typ`)
+
+### Font stack
+
+The preferred fonts, in order:
+
+| Role | Primary font | Fallbacks |
+|---|---|---|
+| Body text | Equity B | IBM Plex Serif, Source Sans 3, system serif |
+| Headings | IBM Plex Sans | system sans-serif |
+| Code | JetBrains Mono | system monospace |
+
+Typst resolves the first font in the list that is installed on the system. If Equity B is not installed, the renderer falls back to IBM Plex Serif without error or interruption. The PDF will look slightly different from the reference output but will render cleanly.
+
+<Tip>
+  Install Equity B and IBM Plex Sans for the closest match to the designed output. Both are available from the Font Bureau and Google Fonts respectively. Font installation is a system-level operation — Quarto and Typst pick them up automatically once they are on your system font path.
+</Tip>
+
+### Heading styles
+
+Heading levels map to Typst's `#heading` show rules in `typst-show.typ`:
+
+| Quarto heading | Typst level | Default style |
+|---|---|---|
+| `# Title` (level 0 / report title) | 0 | Centered, IBM Plex Sans, large |
+| `## Section` (level 1) | 1 | Left-aligned, IBM Plex Sans, bold |
+| `### Subsection` (level 2) | 2 | Left-aligned, IBM Plex Sans, medium weight |
+| `#### Sub-subsection` (level 3) | 3 | Left-aligned, italic |
+
+### Body text
+
+Body paragraphs render justified. The `typst-show.typ` file sets this via:
+
+```typst
+#set par(justify: true)
+```
+
+To switch to left-aligned (ragged right) body text, change `true` to `false`.
+
+## What is safe to customise
+
+<Tabs>
+  <Tab title="Safe to change">
+    These properties are straightforward to modify and unlikely to cause unexpected side effects:
+
+    - **Paper size** — `paper: "a4"` → `paper: "us-letter"`
+    - **Margins** — increase or decrease any margin value
+    - **Font fallback order** — add or reorder fonts in the font stack arrays
+    - **Body text alignment** — `justify: true` → `justify: false`
+    - **Heading font size** — adjust `size:` values in heading show rules
+    - **Heading color** — add `fill: rgb("#1A3D5C")` to a heading show rule
+  </Tab>
+  <Tab title="Best left alone">
+    These properties interact with Quarto's Typst compilation pipeline. Modifying them without understanding the pipeline can break rendering:
+
+    - **Header/footer page selectors** — the logic that suppresses the CONFIDENTIAL header on page 1
+    - **Front matter variable bindings** — how `patient`, `doe`, and `date_of_report` are passed from YAML to Typst
+    - **The `#show` rule for raw blocks** — controls code block rendering; changing it affects all code in the report
+    - **Document structure markers** — Quarto injects structural markers that Typst uses to manage page flow
+  </Tab>
+</Tabs>
+
+## Customising the CONFIDENTIAL header text
+
+If you need to change the header label from `CONFIDENTIAL` to something else — for example, `PRIVILEGED AND CONFIDENTIAL` or a practice name — find the header text in `typst-template.typ`:
+
+```typst
+// Locate the header content block — it looks approximately like this
+#context {
+  if counter(page).get().first() > 1 [
+    CONFIDENTIAL — #doc-patient — #doc-doe
+  ]
+}
+```
+
+Edit the string literal `CONFIDENTIAL` to match your preferred label. The `#doc-patient` and `#doc-doe` references pull from the front matter and should not be changed.
+
+<Note>
+  Typst variables injected by Quarto use a `doc-` prefix by convention in Neurotyp templates. You will see `doc-patient`, `doc-doe`, `doc-name`, and similar identifiers in the Typst source. These map directly to the YAML front matter fields of the same name (minus the `doc-` prefix).
+</Note>
+
+## Sharing customisations across templates
+
+The style repository at `brainworkup/style` contains all three sibling extensions under `_extensions/brainworkup/` along with shared template resources. If you maintain customised Typst files and want consistent formatting across adult, pediatric, and forensic reports, consider forking the style repository and referencing your fork in each extension's `_extension.yml`.

@@ -1,0 +1,195 @@
+---
+title: "Install and configure Luria Voice extensions"
+description: "Install any of the four Neurotyp report extensions, add formats to existing projects, update to the latest version, and configure R dependencies."
+---
+
+Luria Voice extensions are distributed as Quarto extensions hosted on GitHub under the `brainworkup` organization. You install them with the `quarto use template` command, which scaffolds a complete project, or with `quarto add` to drop an extension into an existing project without overwriting your files.
+
+## System requirements
+
+Make sure these are in place before installing any extension:
+
+| Dependency | Minimum version | Notes |
+|---|---|---|
+| Quarto | 1.4.0 | Includes a bundled Typst binary |
+| R | 4.2.0 or later | Required for data processing chunks |
+| cingulate (R package) | Latest | Installed from GitHub; see [R dependencies](#r-dependencies) |
+| Ollama | Any | Optional; only needed for AI-assisted narratives in `neurotyp-luria` |
+
+<Note>
+  Typst is bundled with Quarto. You do not need a separate Typst installation unless you are editing the `.typ` template files directly.
+</Note>
+
+## Scaffold a new project
+
+Use `quarto use template` to create a new report project from scratch. Quarto downloads the extension, copies the starter `template.qmd`, and sets up the full directory structure in one step.
+
+<CodeGroup>
+
+```bash Adult
+quarto use template brainworkup/neurotyp-adult
+```
+
+```bash Pediatric
+quarto use template brainworkup/neurotyp-pediatric
+```
+
+```bash Forensic
+quarto use template brainworkup/neurotyp-forensic
+```
+
+```bash Luria (LLM-assisted)
+quarto use template brainworkup/neurotyp-luria
+```
+
+</CodeGroup>
+
+Quarto will prompt you to confirm that you trust the template source and ask for a directory name for the new project. After scaffolding, your project directory looks like this:
+
+```text
+neurotyp-adult/
+├── _extensions/
+│   └── neurotyp-adult/
+│       ├── _extension.yml
+│       ├── typst-template.typ
+│       └── typst-show.typ
+├── _brand/
+│   └── _brand.yml
+├── template.qmd
+├── LICENSE
+└── README.md
+```
+
+`template.qmd` is your starting point. Open it, fill in patient metadata in the YAML front matter, and begin writing your report. See the [Quickstart](/quickstart) for a full walkthrough.
+
+## Add to an existing project
+
+If you already have a Quarto project and want to add a Luria Voice format without scaffolding a new `template.qmd`, use `quarto add`. This installs only the extension files under `_extensions/` and leaves your existing files untouched.
+
+<CodeGroup>
+
+```bash Adult
+quarto add brainworkup/neurotyp-adult
+```
+
+```bash Pediatric
+quarto add brainworkup/neurotyp-pediatric
+```
+
+```bash Forensic
+quarto add brainworkup/neurotyp-forensic
+```
+
+```bash Luria (LLM-assisted)
+quarto add brainworkup/neurotyp-luria
+```
+
+</CodeGroup>
+
+After adding the extension, reference the format in your document's front matter:
+
+```yaml
+---
+format:
+  neurotyp-adult-typst: default
+---
+```
+
+Then render with:
+
+```bash
+quarto render your-report.qmd --to neurotyp-adult-typst
+```
+
+## Update extensions
+
+To pull in the latest changes from GitHub, run the update command from inside your project directory:
+
+<CodeGroup>
+
+```bash Adult
+quarto update extension brainworkup/neurotyp-adult
+```
+
+```bash Pediatric
+quarto update extension brainworkup/neurotyp-pediatric
+```
+
+```bash Forensic
+quarto update extension brainworkup/neurotyp-forensic
+```
+
+```bash Luria (LLM-assisted)
+quarto update extension brainworkup/neurotyp-luria
+```
+
+</CodeGroup>
+
+<Warning>
+  Updating an extension overwrites the files under `_extensions/`. If you have made local edits to `typst-template.typ` or `typst-show.typ`, back them up before updating or version-control your project with Git.
+</Warning>
+
+## R dependencies
+
+Luria Voice report templates use R code chunks for score processing and visualization. You need several CRAN packages and the `cingulate` package from GitHub.
+
+### Install CRAN packages
+
+```r
+install.packages(c(
+  "dplyr",
+  "readr",
+  "here",
+  "yaml",
+  "ggplot2",
+  "systemfonts"
+))
+```
+
+### Install cingulate from GitHub
+
+The `cingulate` package is not on CRAN. Install it using `pak` (recommended) or `remotes`:
+
+<CodeGroup>
+
+```r pak (recommended)
+# Install pak if you don't have it
+install.packages("pak")
+
+pak::pkg_install("brainworkup/cingulate")
+```
+
+```r remotes
+# Install remotes if you don't have it
+install.packages("remotes")
+
+remotes::install_github("brainworkup/cingulate")
+```
+
+</CodeGroup>
+
+<Tip>
+  `pak` resolves dependencies faster and handles system library conflicts more gracefully than `remotes`. If you are setting up a fresh R environment, prefer `pak`.
+</Tip>
+
+### Optional: Ollama for AI narratives
+
+The `neurotyp-luria` extension can generate narrative sections using a locally running Ollama model. Ollama keeps all patient data on your machine — no data is sent to external APIs.
+
+Install Ollama from [ollama.com](https://ollama.com), then pull a model:
+
+```bash
+ollama pull llama3
+```
+
+Once Ollama is running locally, `cingulate` connects to it automatically when you call the narrative generation functions in your `.qmd` file. See [AI-assisted narratives](/guides/ai-narratives) for configuration details.
+
+## Verify your installation
+
+After installing an extension and its dependencies, render the scaffolded template to confirm everything is working:
+
+```bash
+quarto render template.qmd
+```
+
+A successful render produces a PDF in your project directory. If the render fails, check the [Troubleshooting](/troubleshooting) page for common errors related to missing R packages, font issues, and Typst compilation problems.

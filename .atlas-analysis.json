@@ -1,0 +1,107 @@
+{
+  "projectType": "framework",
+  "projectName": "Luria Voice",
+  "projectDescription": "A Quarto + Typst framework for neuropsychologists to generate polished, clinic-ready neuropsychological evaluation reports as professional PDFs.",
+  "theme": "palm",
+  "primaryColor": "#2C5F8A",
+  "lightColor": "#4A90C4",
+  "darkColor": "#1A3D5C",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/overview",
+              "concepts/report-structure",
+              "concepts/template-formats"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/first-report",
+              "guides/patient-metadata",
+              "guides/cognitive-domains",
+              "guides/ai-narratives",
+              "guides/customizing-output"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/brand",
+              "configuration/quarto-settings",
+              "configuration/dependencies"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Templates",
+        "groups": [
+          {
+            "group": "Report Formats",
+            "pages": [
+              "templates/overview",
+              "templates/pediatric",
+              "templates/adult",
+              "templates/forensic",
+              "templates/luria"
+            ]
+          },
+          {
+            "group": "Template Reference",
+            "pages": [
+              "templates/front-matter",
+              "templates/section-partials",
+              "templates/typst-formatting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Quarto extensions for pediatric, adult, forensic, and Luria-style neuropsychological report formats",
+    "PDF rendering via Typst with professional clinic-ready typography and layout",
+    "Modular section partials for cognitive domain findings, behavioral observations, and SIRF summaries",
+    "CONFIDENTIAL header auto-injected on all pages after page 1",
+    "Integration with the cingulate R package for data processing and visualization",
+    "Optional AI-assisted narrative generation via a local Ollama LLM backend",
+    "YAML front matter for patient demographics and case metadata",
+    "Brand theming via _brand.yml for consistent visual identity"
+  ],
+  "publicApiSurface": [
+    "quarto use template brainworkup/neurotyp-luria",
+    "quarto use template brainworkup/neurotyp-adult",
+    "quarto use template brainworkup/neurotyp-pediatric",
+    "quarto use template brainworkup/neurotyp-forensic",
+    "quarto add brainworkup/neurotyp-adult",
+    "quarto update extension brainworkup/neurotyp-adult",
+    "quarto render template.qmd --to neurotyp-adult-typst",
+    "quarto render template.qmd --to neurotyp-pediatric-typst",
+    "quarto render template.qmd --to neurotyp-forensic-typst",
+    "YAML front matter: patient, name, dob, age, doe, case_number, date_of_report",
+    "_brand.yml brand configuration",
+    "_extensions/neurotyp-*/typst-template.typ",
+    "_extensions/neurotyp-*/typst-show.typ"
+  ]
+}

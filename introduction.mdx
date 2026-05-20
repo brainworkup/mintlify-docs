@@ -1,0 +1,50 @@
+---
+title: "Luria Voice: neuropsychological report framework"
+description: "Luria Voice is a Quarto + Typst framework that lets neuropsychologists render clinic-ready PDF evaluation reports from structured Markdown files."
+---
+
+Luria Voice is an open-source documentation framework built for neuropsychologists. You write patient evaluations as structured Quarto Markdown (`.qmd`) files, and Luria Voice renders them into polished, clinic-ready PDF reports — complete with professional typography, confidential headers, and section layouts that match clinical standards. No manual formatting in Word, no proprietary report-writing software.
+
+## The problem it solves
+
+Writing neuropsychological evaluation reports is time-consuming. Clinicians spend hours reformatting the same sections — demographics, test batteries, cognitive domain narratives, SIRF summaries, signature blocks — across every patient. Luria Voice separates content from presentation: you fill in structured YAML front matter and Markdown prose once, and the framework handles every layout detail automatically.
+
+## The Neurotyp ecosystem
+
+Luria Voice is maintained by [brainworkup](https://github.com/brainworkup) (Joey Trampush, PhD). It consists of four Quarto extensions and a companion R package:
+
+<CardGroup cols={2}>
+  <Card title="neurotyp-adult" icon="user" href="/templates/adult">
+    Adult neuropsychological evaluation reports with standard cognitive domain sections and SIRF summary.
+  </Card>
+  <Card title="neurotyp-pediatric" icon="baby" href="/templates/pediatric">
+    Pediatric evaluation reports with age-appropriate section structure and developmental context.
+  </Card>
+  <Card title="neurotyp-forensic" icon="scale" href="/templates/forensic">
+    Forensic evaluation reports formatted for legal and court contexts.
+  </Card>
+  <Card title="neurotyp-luria" icon="brain" href="/templates/luria">
+    LLM-templated Luria-style reports with optional AI-assisted narrative generation via Ollama.
+  </Card>
+</CardGroup>
+
+The **cingulate** R package underpins the data layer — it provides functions for processing test scores, generating visualizations, and optionally driving AI-assisted narrative sections through a local Ollama backend.
+
+## Key capabilities
+
+- **Typst rendering** — reports are typeset with Typst (bundled inside Quarto), producing high-fidelity PDFs with precise margins, custom fonts, and per-page confidential headers.
+- **Structured patient metadata** — patient demographics, dates of evaluation, and case numbers live in YAML front matter, keeping data separate from prose.
+- **Multiple report formats** — one `.qmd` file can render to `neurotyp-adult-typst`, `neurotyp-pediatric-typst`, `neurotyp-forensic-typst`, or the default Luria format with a single flag change.
+- **AI-assisted narratives** — the `neurotyp-luria` extension integrates with a local Ollama backend so you can generate or refine narrative sections without sending patient data to external APIs.
+- **Brand theming** — a `_brand.yml` file controls clinic name, logo, colors, and preferred fonts (Equity B, IBM Plex Sans/Serif, Source Sans 3, JetBrains Mono).
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Install Quarto, scaffold your first report project, and render a PDF in under five minutes.
+  </Card>
+  <Card title="Installation" icon="package" href="/installation">
+    Detailed setup for all four extensions, existing-project installs, and R dependency configuration.
+  </Card>
+</CardGroup>

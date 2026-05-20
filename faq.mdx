@@ -1,0 +1,105 @@
+---
+title: "Luria Voice FAQ: setup, formats, and workflow"
+description: "Answers to common questions about Luria Voice, including template setup, Windows support, Ollama, logos, updates, and Python compatibility."
+---
+
+The questions below cover the topics that come up most often when getting started with Luria Voice or working with it day to day.
+
+<AccordionGroup>
+  <Accordion title="What is the difference between `quarto use template` and `quarto add`?">
+    These two commands serve different purposes and are not interchangeable.
+
+    **`quarto use template brainworkup/neurotyp-adult`** creates a brand-new project directory pre-populated with the extension, a starter `template.qmd`, `_quarto.yml`, `_brand/_brand.yml`, and supporting files. Use this command when you are starting a project from scratch.
+
+    **`quarto add brainworkup/neurotyp-adult`** installs only the extension files into an existing project's `_extensions/` directory. It does not overwrite your `template.qmd` or any other project files. Use this command when you already have a project and just need to install or reinstall the extension.
+
+    In practice: run `quarto use template` once to bootstrap a new evaluation project, and run `quarto add` (or `quarto update`) in existing projects.
+  </Accordion>
+
+  <Accordion title="Can I use multiple report formats in one project?">
+    Yes. Define additional formats under the `format` key in `_quarto.yml`:
+
+    ```yaml _quarto.yml
+    format:
+      neurotyp-adult-typst:
+        toc: false
+        keep-typ: false
+      html:
+        theme: default
+        toc: true
+    ```
+
+    Running `quarto render template.qmd` produces all defined outputs. To render only the PDF, target the format explicitly:
+
+    ```bash
+    quarto render template.qmd --to neurotyp-adult-typst
+    ```
+
+    <Note>
+    HTML output will not include Typst-specific layout features such as the CONFIDENTIAL running header or the precise margin settings from `typst-template.typ`. Use the HTML format for internal review drafts only.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Does Luria Voice work on Windows?">
+    Yes. Quarto, R, and Typst all run on Windows. Install Quarto from [quarto.org](https://quarto.org) and R from [cran.r-project.org](https://cran.r-project.org) using their standard Windows installers.
+
+    A few things to keep in mind on Windows:
+
+    - Run all Quarto commands from a terminal where `quarto` is on your `PATH`. The Quarto installer adds this automatically; if it does not, add the Quarto `bin` directory to your system `PATH` manually.
+    - The `here` R package handles path separators cross-platform, so file path differences between Windows and macOS/Linux are handled automatically when you use `here::here()` in your R code.
+    - Font installation works the same way: install fonts via the Windows Font Settings and Typst will find them.
+  </Accordion>
+
+  <Accordion title="Is Ollama required?">
+    No. Ollama is optional. All core Luria Voice features — scoring tables, figures, domain summaries, and PDF formatting — work without it.
+
+    Ollama is only needed if you use the AI narrative generation feature, which produces automatically drafted prose summaries for cognitive domains. If your workflow does not include AI narratives, you can ignore Ollama entirely.
+
+    If you do want to use AI narratives, install Ollama from [ollama.com](https://ollama.com) and run `ollama serve` before calling `quarto render`.
+  </Accordion>
+
+  <Accordion title="Can I add my own practice logo?">
+    Yes. Place your logo file in the `_brand/` directory and update `_brand/_brand.yml`:
+
+    ```yaml _brand/_brand.yml
+    logo:
+      images:
+        - path: my-practice-logo.png
+          alt: Riverside Neuropsychology Associates
+    ```
+
+    Use a PNG at 300 dpi for sharp output in the PDF. The logo appears on the report cover page. Changes take effect on the next `quarto render`.
+  </Accordion>
+
+  <Accordion title="How do I update the extension without losing my template customizations?">
+    Run the update command from your project root:
+
+    ```bash
+    quarto update extension brainworkup/neurotyp-adult
+    ```
+
+    This updates only the files inside `_extensions/neurotyp-adult/` — it does not touch your `template.qmd`, `_quarto.yml`, `_brand/_brand.yml`, or any data files. Your customizations are safe.
+
+    <Warning>
+    If you have manually edited files inside `_extensions/neurotyp-adult/` (for example, `typst-template.typ` or `typst-show.typ`), those changes will be overwritten by the update. Before updating, copy any custom edits to a separate file or note them down, then reapply them after the update completes.
+    </Warning>
+
+    After updating, re-render your template to confirm that nothing has changed in the output unexpectedly:
+
+    ```bash
+    quarto render template.qmd --to neurotyp-adult-typst
+    ```
+  </Accordion>
+
+  <Accordion title="What does SIRF stand for?">
+    SIRF stands for **Summary, Impressions, Recommendations, and Findings**. It is the final section of every Luria Voice report — a single integrated narrative that synthesises the evaluation, states the clinician's diagnostic impressions, and provides actionable recommendations. The SIRF is written to stand alone, so it can be read by referral sources or reviewers without consulting the full domain sections.
+  </Accordion>
+
+  <Accordion title="Can I use Python instead of R?">
+    Luria Voice's data pipeline — scoring, norming, domain assembly, and figure generation — is written in R and depends on the `cingulate` R package. There is no Python equivalent for `cingulate` at this time.
+
+    That said, Quarto supports Python code chunks (via Jupyter or the `reticulate` bridge), so you can mix Python chunks into your `.qmd` file for tasks that do not depend on the `cingulate` pipeline, such as custom visualizations or data preprocessing steps you have written in Python.
+
+    If you want to use Python for the full pipeline, you would need to reimplement the `cingulate` scoring and norming logic yourself. The R-based workflow is the only supported path for generating clinic-ready reports with Luria Voice today.
+  </Accordion>
+</AccordionGroup>

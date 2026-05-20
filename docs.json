@@ -1,0 +1,117 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "sequoia",
+  "name": "Luria Voice",
+  "description": "Documentation for Luria Voice — Quarto + Typst templates for professional neuropsychological evaluation reports.",
+  "colors": {
+    "primary": "#2C5F8A",
+    "light": "#4A90C4",
+    "dark": "#1A3D5C"
+  },
+  "favicon": "/favicon.ico",
+  "icons": {
+    "library": "lucide"
+  },
+  "metadata": {
+    "timestamp": true
+  },
+  "contextual": {
+    "options": ["copy", "view", "assistant", "mcp", "add-mcp"]
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "index",
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/overview",
+              "concepts/report-structure",
+              "concepts/template-formats"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/first-report",
+              "guides/patient-metadata",
+              "guides/cognitive-domains",
+              "guides/ai-narratives",
+              "guides/customizing-output"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/brand",
+              "configuration/quarto-settings",
+              "configuration/dependencies"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Templates",
+        "groups": [
+          {
+            "group": "Report Formats",
+            "pages": [
+              "templates/overview",
+              "templates/pediatric",
+              "templates/adult",
+              "templates/forensic",
+              "templates/luria"
+            ]
+          },
+          {
+            "group": "Template Reference",
+            "pages": [
+              "templates/front-matter",
+              "templates/section-partials",
+              "templates/typst-formatting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/brainworkup"
+      }
+    ],
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/brainworkup"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/brainworkup",
+      "github": "https://github.com/brainworkup"
+    }
+  }
+}

@@ -1,0 +1,145 @@
+---
+title: "Luria Voice system requirements and dependencies"
+description: "Full list of required and optional software for Luria Voice, including versions, download links, and R package install commands."
+---
+
+Luria Voice depends on a small set of external tools and R packages. The table below lists every dependency, its minimum version, whether it is required or optional, and where to get it. Detailed install instructions follow.
+
+## Requirements at a glance
+
+| Dependency | Minimum version | Required | Notes |
+|---|---|---|---|
+| Quarto | 1.4.0 | Yes | Bundles Typst — no separate Typst install needed |
+| Typst | Bundled with Quarto | Yes | Do not install separately unless debugging |
+| R | 4.2.0 | Yes | Earlier versions may work but are untested |
+| dplyr | any CRAN | Yes | Data manipulation |
+| readr | any CRAN | Yes | CSV / data file reading |
+| here | any CRAN | Yes | Portable file paths |
+| yaml | any CRAN | Yes | YAML front-matter parsing |
+| ggplot2 | any CRAN | Yes | Figure generation |
+| systemfonts | any CRAN | Yes | Font detection for Typst |
+| cingulate | GitHub (brainworkup) | Yes | Report pipeline utilities |
+| Ollama | any | No | Required only for AI narrative generation |
+
+## Quarto
+
+Quarto ≥ 1.4.0 is required. Quarto 1.4 introduced the Typst output format that Luria Voice depends on. Download the installer for your operating system from [quarto.org](https://quarto.org).
+
+After installing, confirm your version:
+
+```bash
+quarto --version
+```
+
+The output should be `1.4.0` or higher.
+
+<Note>
+Quarto ≥ 1.4.0 ships with Typst embedded. You do not need to install Typst separately. If you have a standalone Typst installation, Quarto uses its own bundled copy and the two will not conflict.
+</Note>
+
+## R
+
+R 4.2 or later is recommended. Download from [cran.r-project.org](https://cran.r-project.org).
+
+Confirm your version in R:
+
+```r
+R.version$major
+R.version$minor
+```
+
+## R packages
+
+Install all required CRAN packages in a single command:
+
+```r
+install.packages(c(
+  "dplyr",
+  "readr",
+  "here",
+  "yaml",
+  "ggplot2",
+  "systemfonts"
+))
+```
+
+### cingulate (GitHub)
+
+The `cingulate` package provides the scoring, norming, and domain-assembly pipeline that populates report sections. It is not on CRAN and must be installed from GitHub.
+
+<Steps>
+  <Step title="Install the remotes package">
+    If you do not already have `remotes`, install it from CRAN:
+
+    ```r
+    install.packages("remotes")
+    ```
+  </Step>
+  <Step title="Install cingulate from GitHub">
+    ```r
+    remotes::install_github("brainworkup/cingulate")
+    ```
+  </Step>
+  <Step title="Verify the installation">
+    ```r
+    library(cingulate)
+    ```
+
+    If this command runs without error, `cingulate` is installed correctly.
+  </Step>
+</Steps>
+
+<Warning>
+`remotes::install_github` requires an internet connection and access to GitHub. If you are behind a corporate firewall, contact your IT department to allow outbound connections to `api.github.com` and `codeload.github.com`.
+</Warning>
+
+## Ollama (optional)
+
+Ollama enables AI-generated narrative summaries within the report. It is entirely optional — all scoring, tables, and figures render without it.
+
+If you want to use AI narratives:
+
+<Steps>
+  <Step title="Download and install Ollama">
+    Download Ollama from [ollama.com](https://ollama.com) and follow the installer for your platform.
+  </Step>
+  <Step title="Pull a model">
+    ```bash
+    ollama pull llama3
+    ```
+  </Step>
+  <Step title="Start the Ollama server before rendering">
+    ```bash
+    ollama serve
+    ```
+
+    Ollama must be running on `localhost:11434` when you call `quarto render`. If it is not running, the narrative generation step will time out and log an error.
+  </Step>
+</Steps>
+
+## Installing everything at once
+
+The following block installs all R dependencies in a single session. Run it once after a fresh R installation.
+
+<CodeGroup>
+
+```r Install all R dependencies
+install.packages(c(
+  "dplyr",
+  "readr",
+  "here",
+  "yaml",
+  "ggplot2",
+  "systemfonts",
+  "remotes"
+))
+
+remotes::install_github("brainworkup/cingulate")
+```
+
+```bash Verify Quarto version
+quarto --version
+# Expected: 1.4.x or higher
+```
+
+</CodeGroup>

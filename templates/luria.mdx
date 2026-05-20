@@ -1,0 +1,115 @@
+---
+title: "neurotyp-luria: AI-assisted evaluation template"
+description: "Install and render the neurotyp-luria extension (v0.1.0) for AI-assisted neuropsychological evaluation reports using a local Ollama backend."
+---
+
+The `neurotyp-luria` extension is Luria Voice's AI-assisted report format. At version 0.1.0 it targets what the project calls "LLM-templated patients" — evaluation reports where narrative sections are drafted or refined by a locally running large language model rather than written entirely by hand. The extension integrates with [Ollama](https://ollama.com), a local inference server, so patient data never leaves your machine.
+
+## What "LLM-templated patients" means
+
+In standard Luria Voice usage you write every narrative sentence yourself, using the R package functions from `cingulate` to generate score tables and visualisations. With `neurotyp-luria`, you can instead provide structured patient data — test scores, demographics, referral question — and let a locally hosted LLM draft the prose narrative for each cognitive domain section. You then review, edit, and approve the output before finalising the report.
+
+This workflow is named after Alexander Luria, the Soviet neuropsychologist who pioneered qualitative, hypothesis-driven assessment. The Luria approach emphasises interpretation over rote score reporting — an orientation that aligns well with LLM-assisted narrative drafting, where the clinician's conceptual framing guides the generation and editing process.
+
+<Warning>
+  AI-generated narrative text must be reviewed and edited by a licensed clinician before inclusion in a signed evaluation report. `neurotyp-luria` is a drafting aid, not a substitute for professional clinical judgment.
+</Warning>
+
+## Prerequisites
+
+The `neurotyp-luria` extension requires a local Ollama installation to generate narrative sections. Install Ollama from [ollama.com](https://ollama.com) and pull a model before rendering.
+
+```bash
+# Install a model — llama3.2 is a reasonable starting point
+ollama pull llama3.2
+```
+
+You do not need Ollama to install or render the template in non-LLM mode. If no Ollama backend is available, the narrative sections render as placeholders.
+
+## Install the extension
+
+<Tabs>
+  <Tab title="New project">
+    Scaffold a new project from the template.
+
+    ```bash
+    quarto use template brainworkup/neurotyp-luria
+    ```
+  </Tab>
+  <Tab title="Existing project">
+    Add the extension to an existing project.
+
+    ```bash
+    quarto add brainworkup/neurotyp-luria
+    ```
+
+    Then update the `format` key in your `template.qmd`:
+
+    ```yaml
+    format: neurotyp-luria-typst
+    ```
+  </Tab>
+</Tabs>
+
+## Render a report
+
+```bash
+quarto render template.qmd --to neurotyp-luria-typst
+```
+
+To preview while editing:
+
+```bash
+quarto preview template.qmd
+```
+
+To update to the latest release:
+
+```bash
+quarto update extension brainworkup/neurotyp-luria
+```
+
+## Configure the report
+
+Complete the front matter in `template.qmd` as you would for any other format.
+
+```yaml
+---
+title: NEUROCOGNITIVE EXAMINATION
+patient: Nguyen
+name: Nguyen, Minh
+dob: "1991-03-17"
+age: 34
+doe: "2025-05-05"
+date_of_report: last-modified
+case_number: "2025-L-003"
+format: neurotyp-luria-typst
+---
+```
+
+See [Front matter reference](/templates/front-matter) for every supported field.
+
+## Luria methodology in Luria Voice
+
+Alexander Luria's approach to neuropsychological assessment moves away from fixed batteries and norm-referenced interpretation toward hypothesis-driven, qualitative analysis. A Luria-style report integrates test performance with behavioral observation, developmental history, and a coherent conceptual account of the patient's neurocognitive profile.
+
+`neurotyp-luria` supports this methodology in two practical ways:
+
+1. **Flexible section composition** — include only the domain partials relevant to your hypothesis about this patient, rather than reporting every subtest in a standardised order.
+2. **LLM-assisted narrative drafting** — use the Ollama integration to generate an initial Luria-style interpretive narrative from structured score data, then refine it to match your clinical formulation.
+
+<Tip>
+  Start with a conceptual summary of the patient's presenting concerns and your primary hypothesis before generating narrative sections. This gives the LLM the interpretive frame it needs to produce clinically coherent prose rather than generic summaries.
+</Tip>
+
+## Add cognitive domain sections
+
+Edit `_domains_to_include.qmd` to include only the domains central to your clinical hypothesis for this patient.
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _attention.qmd >}}
+```
+
+See [Modular section partials](/templates/section-partials) for how the include pattern works and how to write your own domain partial files.

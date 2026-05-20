@@ -1,0 +1,73 @@
+---
+title: "Neurotyp report template formats at a glance"
+description: "Compare the four Neurotyp report formats — adult, pediatric, forensic, and Luria — and choose the right template for each evaluation context."
+---
+
+Luria Voice ships four independent Quarto extensions, each producing a distinct PDF layout tailored to a specific evaluation context. Rather than one generic template controlled by flags, each format is a standalone extension with its own typography, page geometry, and heading treatment — keeping the output predictable and the source readable.
+
+## Choosing a template
+
+Use the table below to select the format that matches your evaluation type.
+
+| Format ID | Extension repo | Use case | Version |
+|---|---|---|---|
+| `neurotyp-adult-typst` | `brainworkup/neurotyp-adult` | Adult neuropsychological evaluations | 0.2.0 |
+| `neurotyp-pediatric-typst` | `brainworkup/neurotyp-pediatric` | Pediatric neuropsychological evaluations | — |
+| `neurotyp-forensic-typst` | `brainworkup/neurotyp-forensic` | Forensic psychological/neuropsychological evaluations | — |
+| `neurotyp-luria-typst` | `brainworkup/neurotyp-luria` | LLM-templated Luria-style reports | 0.1.0 |
+
+If you are unsure which format to use, start with `neurotyp-adult` or `neurotyp-pediatric`. Both are the most field-tested and share the same front matter schema, so switching between them later requires only a one-line change in your `template.qmd`.
+
+## Template formats
+
+<CardGroup cols={2}>
+  <Card title="Adult" icon="user" href="/templates/adult">
+    Standard adult neuropsychological evaluation. Includes SIRF summary, cognitive domain sections, and a confidential page header. Version 0.2.0.
+  </Card>
+  <Card title="Pediatric" icon="baby" href="/templates/pediatric">
+    Age-appropriate layout for pediatric evaluations. Adjusted heading treatment and section ordering reflect developmental assessment conventions.
+  </Card>
+  <Card title="Forensic" icon="scale" href="/templates/forensic">
+    Court-ready formatting for forensic psychological and neuropsychological evaluations. Emphasizes formal visual presentation suitable for legal contexts.
+  </Card>
+  <Card title="Luria" icon="brain" href="/templates/luria">
+    Luria-style reports designed for AI-assisted patient profiling via a local Ollama backend. Version 0.1.0.
+  </Card>
+</CardGroup>
+
+## Shared structure
+
+All four templates follow the same directory layout and front matter schema.
+
+```text
+neurotyp-adult/
+├── _extensions/
+│   └── neurotyp-adult/
+│       ├── _extension.yml
+│       ├── typst-template.typ
+│       └── typst-show.typ
+├── _brand/
+│   └── _brand.yml
+├── template.qmd
+├── LICENSE
+└── README.md
+```
+
+- **`typst-template.typ`** — page layout: paper size, margins, and the CONFIDENTIAL header on pages 2 and beyond.
+- **`typst-show.typ`** — typography show rules: font stacks, heading sizes, and text alignment.
+- **`_brand.yml`** — brand configuration: clinic colors, logo path, and preferred font families.
+- **`template.qmd`** — the master report document. You edit this file for each patient.
+
+## Template reference
+
+<CardGroup cols={3}>
+  <Card title="Front matter" icon="file-code" href="/templates/front-matter">
+    Complete reference for every YAML front matter field — patient metadata, dates, and case identifiers.
+  </Card>
+  <Card title="Section partials" icon="layout-list" href="/templates/section-partials">
+    How to include and exclude cognitive domain sections using Quarto's `include` shortcode.
+  </Card>
+  <Card title="Typst formatting" icon="type" href="/templates/typst-formatting">
+    Page layout, margins, typography rules, and what you can safely customize in the Typst files.
+  </Card>
+</CardGroup>

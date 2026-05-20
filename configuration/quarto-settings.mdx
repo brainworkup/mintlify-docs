@@ -1,0 +1,113 @@
+---
+title: "_quarto.yml settings reference for Luria Voice"
+description: "Understand every field in _quarto.yml for Luria Voice projects, including output format, knitr chunk options, and render-on-save behavior."
+---
+
+The `_quarto.yml` file at the root of your project controls how Quarto builds your report. Luria Voice requires this file to be present in the same directory from which you run `quarto render`. If Quarto cannot find `_quarto.yml` in the current directory, it will not resolve the `neurotyp-adult` extension and rendering will fail.
+
+## Project type
+
+```yaml _quarto.yml
+project:
+  type: default
+```
+
+Set `type` to `default` for single-document neuropsychological reports. Use `type: book` only if you are building a multi-document project such as a training manual — standard evaluation reports do not need book mode.
+
+## Format settings
+
+```yaml _quarto.yml
+format:
+  neurotyp-adult-typst:
+    toc: false
+    keep-typ: false
+```
+
+| Field | Default | Description |
+|---|---|---|
+| `toc` | `false` | Table of contents. Keep `false` for clinical reports — sections are short and a TOC adds visual clutter. |
+| `keep-typ` | `false` | Retain the intermediate `.typ` file after rendering. Set to `true` when debugging Typst layout issues. |
+
+<Note>
+The format key `neurotyp-adult-typst` tells Quarto to use the `neurotyp-adult` extension's Typst output format. This key must match exactly. The extension must be installed in your project (run `quarto add brainworkup/neurotyp-adult` from your project root if it is missing).
+</Note>
+
+### Using multiple formats
+
+You can define additional formats in the same `_quarto.yml` if you need to output both PDF and HTML for the same source document:
+
+```yaml _quarto.yml
+format:
+  neurotyp-adult-typst:
+    toc: false
+    keep-typ: false
+  html:
+    theme: default
+    toc: true
+```
+
+Run `quarto render template.qmd` to produce both outputs at once, or target a specific format with `--to`:
+
+```bash
+quarto render template.qmd --to neurotyp-adult-typst
+```
+
+## Knitr chunk options
+
+```yaml _quarto.yml
+knitr:
+  opts_chunk:
+    echo: false
+    warning: false
+    message: false
+```
+
+These global chunk options suppress all R source code, warnings, and package startup messages from the rendered PDF. This is the correct default for clinical reports — patients and referring clinicians should not see R output in their evaluation document.
+
+| Option | Value | Effect |
+|---|---|---|
+| `echo` | `false` | Hides R source code from output |
+| `warning` | `false` | Suppresses R warnings |
+| `message` | `false` | Suppresses package messages (e.g., `tidyverse` loading messages) |
+
+<Tip>
+Override these defaults for a specific chunk by setting options inline: `#| echo: true`. This is useful when you want to show a table-generating command during development without changing the global defaults.
+</Tip>
+
+## Render on save
+
+```yaml _quarto.yml
+editor:
+  render-on-save: true
+```
+
+When `render-on-save` is `true`, supported editors (VS Code with the Quarto extension, RStudio) automatically re-render the document each time you save. This gives you a live preview loop without manually running `quarto render`.
+
+<Warning>
+Render-on-save re-runs all R code on every save. If your report calls slow computations or hits an external API (such as Ollama for AI narratives), disable this option and render manually to avoid long waits on each keystroke.
+</Warning>
+
+## Full example
+
+```yaml _quarto.yml
+project:
+  type: default
+
+format:
+  neurotyp-adult-typst:
+    toc: false
+    keep-typ: false
+
+knitr:
+  opts_chunk:
+    echo: false
+    warning: false
+    message: false
+
+editor:
+  render-on-save: true
+```
+
+## Extension resolution
+
+Quarto resolves the `neurotyp-adult` extension by looking for an `_extensions/neurotyp-adult/` directory relative to your project root (the folder containing `_quarto.yml`). Always run `quarto render`, `quarto add`, and `quarto update` from that same root directory. Running these commands from a subdirectory or a different path will cause extension-not-found errors.

@@ -1,0 +1,114 @@
+---
+title: "neurotyp-forensic: court-ready evaluation template"
+description: "Install and render the neurotyp-forensic extension for court-ready forensic psychological and neuropsychological evaluation PDFs for legal contexts."
+---
+
+The `neurotyp-forensic` extension produces evaluation reports formatted for forensic psychological and neuropsychological contexts — civil litigation, criminal competency evaluations, disability determinations, and other matters where a document may be submitted to a court or reviewed by legal professionals. The layout prioritises formal visual presentation: clean typography, explicit confidential headers, and a professional appearance appropriate for legal proceedings.
+
+## Install the extension
+
+<Tabs>
+  <Tab title="New project">
+    Scaffold a new project in an empty directory.
+
+    ```bash
+    quarto use template brainworkup/neurotyp-forensic
+    ```
+
+    Use a referral- or case-keyed directory name such as `2025-atty-referral-001/` to distinguish forensic cases from clinical evaluations on disk.
+  </Tab>
+  <Tab title="Existing project">
+    Add the extension to an existing Quarto project.
+
+    ```bash
+    quarto add brainworkup/neurotyp-forensic
+    ```
+
+    Then update the `format` key in your `template.qmd`:
+
+    ```yaml
+    format: neurotyp-forensic-typst
+    ```
+  </Tab>
+</Tabs>
+
+## Render a report
+
+```bash
+quarto render template.qmd --to neurotyp-forensic-typst
+```
+
+To preview while editing:
+
+```bash
+quarto preview template.qmd
+```
+
+To pull in the latest release:
+
+```bash
+quarto update extension brainworkup/neurotyp-forensic
+```
+
+## Configure the report
+
+Open `template.qmd` and complete the front matter for this referral.
+
+```yaml
+---
+title: FORENSIC NEUROPSYCHOLOGICAL EVALUATION
+patient: Rivera
+name: Rivera, Carlos
+dob: "1985-11-22"
+age: 39
+doe: "2025-02-14"
+doe2: "2025-02-15"
+date_of_report: last-modified
+case_number: "2025-F-008"
+format: neurotyp-forensic-typst
+---
+```
+
+<Note>
+  Use a case number format that distinguishes forensic referrals from clinical cases — for example, prefix with `F-` — so reports are easy to identify in your practice management system.
+</Note>
+
+See [Front matter reference](/templates/front-matter) for a complete description of every field.
+
+## Forensic-specific formatting
+
+The `neurotyp-forensic` extension applies presentation choices appropriate for legal contexts:
+
+- **Formal heading treatment** — section headings use conservative weight and spacing that reads clearly when printed or reproduced in legal filings.
+- **CONFIDENTIAL header** — every page from page 2 onward displays the patient's last name and report date. This is especially important for multi-page forensic reports where pages may become separated.
+- **Professional typography** — the same Equity B / IBM Plex Sans font stack as the other templates, chosen for legibility at small sizes and when photocopied.
+- **A4 geometry** — 30 mm top, 25 mm sides, consistent with the other formats so report sections remain visually comparable if a court receives multiple evaluations.
+
+<Warning>
+  Forensic reports often have strict formatting requirements that vary by jurisdiction and by the referring attorney or court. Review your jurisdiction's requirements before finalising a report and consult with the referring party if in doubt. Luria Voice controls visual formatting only — content and professional standards remain your responsibility.
+</Warning>
+
+## Add evaluation sections
+
+Edit `_domains_to_include.qmd` to include the sections relevant to this referral question.
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive_function.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _validity.qmd >}}
+```
+
+For forensic evaluations, performance validity and symptom validity sections are often critical. Include a dedicated validity partial and document validity test results explicitly.
+
+See [Modular section partials](/templates/section-partials) for the full include pattern.
+
+## Typst source files
+
+| File | Controls |
+|---|---|
+| `_extensions/neurotyp-forensic/typst-template.typ` | Page size, margins, CONFIDENTIAL header, footer |
+| `_extensions/neurotyp-forensic/typst-show.typ` | Font stacks, heading styles, body text alignment |
+
+See [Typst layout and typography reference](/templates/typst-formatting) before editing either file.

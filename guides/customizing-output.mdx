@@ -1,0 +1,192 @@
+---
+title: "Customize report typography, colors, and layout"
+description: "Adjust brand colors and fonts in brand.yml, change page margins and paper size in typst-template.typ, and override Quarto settings in _quarto.yml."
+---
+
+Luria Voice separates visual customization into three layers: brand settings in `_brand/_brand.yml` for colors and typography, Typst template files for page-level layout, and `_quarto.yml` for Quarto project settings. You can go as far as you need with each layer — many practices need only a color and font change, while others want complete control over margins, header style, and page geometry.
+
+## Layer 1 — Brand colors and typography (`_brand/_brand.yml`)
+
+The `_brand/_brand.yml` file is the fastest way to apply your practice's visual identity. Changes here propagate automatically to headings, tables, figures, and any other branded element in the Typst template.
+
+### Colors
+
+Set `primary` and `secondary` hex values to match your practice's color palette:
+
+```yaml
+color:
+  primary: "#2C5F8A"
+  secondary: "#4A90C4"
+```
+
+The `primary` color is used for section headings and the cover page accent. The `secondary` color appears in table headers and figure annotations.
+
+### Typography
+
+Declare fonts under the `typography.fonts` list. Each font entry needs a `family` name and a `source`.
+
+```yaml
+typography:
+  fonts:
+    - family: Equity B
+      source: file
+    - family: IBM Plex Sans
+      source: google
+    - family: JetBrains Mono
+      source: google
+```
+
+<Tabs>
+  <Tab title="File fonts">
+    Use `source: file` for fonts you have licensed and installed on your system. Typst will locate them from your OS font directory.
+
+    ```yaml
+    typography:
+      fonts:
+        - family: Equity B
+          source: file
+    ```
+  </Tab>
+  <Tab title="Google Fonts">
+    Use `source: google` for any font available on Google Fonts. Quarto downloads and bundles it automatically at render time.
+
+    ```yaml
+    typography:
+      fonts:
+        - family: IBM Plex Sans
+          source: google
+        - family: JetBrains Mono
+          source: google
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Luria Voice is designed around three fonts: **Equity B** (serif body text), **IBM Plex Sans** (sans-serif headings and UI elements), and **JetBrains Mono** (code blocks and score labels). If Equity B is not installed on your system, Typst will fall back to a system serif automatically. Substitute any licensed serif — Georgia, Charter, or Source Serif 4 are all reasonable alternatives.
+</Tip>
+
+### Full `brand.yml` example
+
+```yaml
+color:
+  primary: "#2C5F8A"
+  secondary: "#4A90C4"
+typography:
+  fonts:
+    - family: Equity B
+      source: file
+    - family: IBM Plex Sans
+      source: google
+    - family: JetBrains Mono
+      source: google
+  body:
+    family: Equity B
+    size: 10.5pt
+  headings:
+    family: IBM Plex Sans
+    weight: 600
+  monospace:
+    family: JetBrains Mono
+```
+
+## Layer 2 — Page layout (`_extensions/neurotyp-adult/typst-template.typ`)
+
+For page-level changes — margins, paper size, header/footer layout — edit the Typst template directly. The relevant file is `_extensions/neurotyp-adult/typst-template.typ`.
+
+### Changing paper size and margins
+
+Find the `#set page(...)` call near the top of `typst-template.typ`:
+
+```typst
+#set page(
+  paper: "a4",
+  margin: (
+    top: 30mm,
+    bottom: 25mm,
+    left: 25mm,
+    right: 25mm,
+  ),
+)
+```
+
+<Tabs>
+  <Tab title="A4 (default)">
+    ```typst
+    #set page(
+      paper: "a4",
+      margin: (top: 30mm, bottom: 25mm, left: 25mm, right: 25mm),
+    )
+    ```
+  </Tab>
+  <Tab title="US Letter">
+    ```typst
+    #set page(
+      paper: "us-letter",
+      margin: (top: 1in, bottom: 1in, left: 1.25in, right: 1.25in),
+    )
+    ```
+  </Tab>
+  <Tab title="Narrow margins">
+    ```typst
+    #set page(
+      paper: "a4",
+      margin: (top: 20mm, bottom: 20mm, left: 20mm, right: 20mm),
+    )
+    ```
+  </Tab>
+</Tabs>
+
+### The `typst-show.typ` file
+
+`_extensions/neurotyp-adult/typst-show.typ` controls how Quarto's document model maps to Typst layout elements — for example, which Typst function handles a Quarto heading level, or how a code block is rendered. Edit this file if you need to restyle specific document elements beyond what `brand.yml` exposes.
+
+<Warning>
+  `typst-template.typ` and `typst-show.typ` live inside the `_extensions/` directory. If you re-run `quarto use template` to update the extension, your edits to these files will be overwritten. Keep a copy of your customizations outside the `_extensions/` directory or track them in version control.
+</Warning>
+
+## Layer 3 — Quarto project settings (`_quarto.yml`)
+
+`_quarto.yml` controls Quarto-level output options — the output format, extension settings, and any variables passed to the Typst template. You rarely need to change this file directly, but it is the right place for settings that do not fit into `brand.yml` or the Typst template.
+
+### Changing the default output format
+
+```yaml
+project:
+  type: default
+
+format:
+  neurotyp-adult-typst:
+    keep-typ: false
+```
+
+Set `keep-typ: true` if you want to inspect the intermediate `.typ` file that Quarto generates before passing it to Typst — useful for debugging layout issues.
+
+### Passing custom variables to the Typst template
+
+```yaml
+format:
+  neurotyp-adult-typst:
+    typst:
+      include-in-header:
+        - text: |
+            #let clinic-name = "Brainworkup Neuropsychology"
+```
+
+Any variables you define here are available throughout `typst-template.typ` and `typst-show.typ`.
+
+## Recommended customization workflow
+
+<Steps>
+  <Step title="Start with brand.yml">
+    Make color and font changes in `_brand/_brand.yml` first. Re-render and confirm the changes look correct before moving to lower layers.
+  </Step>
+  <Step title="Adjust margins if needed">
+    If the default A4 margins do not match your practice's letterhead or printing requirements, edit the `#set page(...)` block in `typst-template.typ`.
+  </Step>
+  <Step title="Use _quarto.yml for format-level options">
+    Reserve `_quarto.yml` for Quarto project settings and format flags. Avoid duplicating settings that are already handled by `brand.yml`.
+  </Step>
+  <Step title="Track your changes in version control">
+    Commit your customized `_brand/_brand.yml`, `typst-template.typ`, and `_quarto.yml` to a Git repository. This protects your changes if you update the extension in the future.
+  </Step>
+</Steps>

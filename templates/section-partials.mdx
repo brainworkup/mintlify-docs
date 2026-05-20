@@ -1,0 +1,138 @@
+---
+title: "Use modular section partials in report templates"
+description: "Use Quarto include shortcodes and domain-specific partial files to include only the cognitive domain sections relevant to each patient's evaluation."
+---
+
+Luria Voice reports are modular by design. Rather than a single long `template.qmd` that contains every possible section, the master template pulls in domain-specific partial files using Quarto's `include` shortcode. You control which sections appear in a given report by editing a single file: `_domains_to_include.qmd`.
+
+## How the include pattern works
+
+Quarto's `include` shortcode inserts the full contents of another `.qmd` file at the point where the shortcode appears. The syntax is:
+
+```markdown
+{{< include _filename.qmd >}}
+```
+
+The leading underscore (`_`) is a Quarto convention: files prefixed with `_` are treated as partials and are not rendered as standalone documents. They are only processed when included by another file.
+
+In a Luria Voice project, `template.qmd` includes `_domains_to_include.qmd` at the point in the report where cognitive domain sections should appear:
+
+```markdown
+{{< include _domains_to_include.qmd >}}
+```
+
+You then populate `_domains_to_include.qmd` with the domain partials for this specific patient.
+
+## The `_domains_to_include.qmd` file
+
+This is the only file you edit to add or remove sections from a report. Each line includes one domain partial.
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive_function.qmd >}}
+{{< include _attention.qmd >}}
+```
+
+To exclude a domain, delete or comment out its line. To reorder sections, change the order of the lines. The rendered PDF reflects the order in this file exactly.
+
+<Tip>
+  Keep a reference `_domains_to_include.qmd` with all available domains listed and commented out. For each patient, uncomment only the relevant ones. This makes it easy to see at a glance which sections are active.
+</Tip>
+
+## Common domain partials
+
+The table below lists the partial files typically available in a Neurotyp project. Create any that are missing for your practice's standard assessment battery.
+
+| File | Domain |
+|---|---|
+| `_neurocognitive.qmd` | General neurocognitive overview / intelligence |
+| `_attention.qmd` | Attention and concentration |
+| `_memory.qmd` | Learning and memory |
+| `_executive_function.qmd` | Executive function |
+| `_language.qmd` | Language and verbal abilities |
+| `_visuospatial.qmd` | Visuospatial and perceptual abilities |
+| `_processing_speed.qmd` | Processing speed |
+| `_social_cognition.qmd` | Social cognition and emotional processing |
+| `_validity.qmd` | Performance and symptom validity |
+| `_sirf.qmd` | Summary, impressions, and recommendations |
+
+## Writing a domain partial
+
+A domain partial is a standard `.qmd` file that contains the prose, R code chunks, and Markdown for one cognitive domain section. It can include anything that is valid in a Quarto document.
+
+The following example shows a memory domain partial that uses the `cingulate` R package to generate a score summary visualisation.
+
+```markdown
+## Learning and Memory
+
+Jane Doe's performance on measures of verbal and visual learning and memory
+was within normal limits overall, with relative weakness on delayed free
+recall tasks compared to recognition memory.
+
+\`\`\`{r memory-plot}
+#| label: fig-memory
+#| fig-cap: "Learning and memory domain scores"
+#| echo: false
+#| warning: false
+
+library(cingulate)
+
+# Generate a domain-level score summary plot
+plot_domain_scores(
+  domain = "memory",
+  patient = params$name,
+  scores = memory_scores
+)
+\`\`\`
+
+*Table 3* summarises the scores from verbal and visual memory tasks administered
+during the evaluation.
+```
+
+<Note>
+  Each partial file is inserted verbatim into the report at render time, including all R code chunks. Variables and objects defined in earlier partials are available to later ones because all partials share the same Quarto rendering session.
+</Note>
+
+## Including or excluding sections per patient
+
+The power of the partial pattern is that you tailor each report to what was actually assessed. A standard adult evaluation might include six domains; a focused attention evaluation might include only two.
+
+**For a comprehensive adult evaluation:**
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _memory.qmd >}}
+{{< include _executive_function.qmd >}}
+{{< include _language.qmd >}}
+{{< include _processing_speed.qmd >}}
+{{< include _validity.qmd >}}
+{{< include _sirf.qmd >}}
+```
+
+**For a focused attention evaluation:**
+
+```markdown
+{{< include _neurocognitive.qmd >}}
+{{< include _attention.qmd >}}
+{{< include _validity.qmd >}}
+{{< include _sirf.qmd >}}
+```
+
+## Nesting partials
+
+You can include partials within partials. For example, a `_memory.qmd` partial could itself include subtest-level partials:
+
+```markdown
+## Learning and Memory
+
+{{< include _memory_verbal.qmd >}}
+{{< include _memory_visual.qmd >}}
+```
+
+Use nesting sparingly. One level of nesting — domain partials included by `_domains_to_include.qmd` — is enough for most evaluations.
+
+<Warning>
+  Quarto does not detect circular includes. If partial A includes partial B and partial B includes partial A, the render will hang or fail. Keep the include hierarchy strictly one-directional.
+</Warning>
