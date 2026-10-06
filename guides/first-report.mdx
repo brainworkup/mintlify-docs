@@ -21,10 +21,10 @@ Before you start, make sure the following are installed:
     quarto use template brainworkup/neurotyp-adult
     ```
 
-    When prompted, enter a directory name for your project (for example, `doe-jane-2025`). After the command completes, your project folder will contain:
+    When prompted, enter a directory name for your project (for example, `Smalls-Biggie-2025`). After the command completes, your project folder will contain:
 
     ```
-    doe-jane-2025/
+    Smalls-Biggie-2025/
     ├── template.qmd          # Main report document
     ├── _quarto.yml           # Quarto project settings
     ├── _brand/
@@ -43,13 +43,13 @@ Before you start, make sure the following are installed:
     ```yaml
     ---
     title: NEUROCOGNITIVE EXAMINATION
-    patient: Doe
-    name: Doe, Jane
+    patient: Smalls
+    name: Smalls, Biggie
     dob: "1980-01-15"
     age: 45
-    doe: "2025-03-10"
-    doe2: "2025-03-11"
-    doe3: "2025-03-12"
+    Smalls: "2025-03-10"
+    Smalls2: "2025-03-11"
+    Smalls3: "2025-03-12"
     date_of_report: last-modified
     case_number: "2025-001"
     ---
@@ -64,18 +64,18 @@ Before you start, make sure the following are installed:
     ```yaml
     ---
     title: NEUROCOGNITIVE EXAMINATION
-    patient: Rivera
-    name: Rivera, Maria
+    patient: Smalls
+    name: Smalls, Biggie
     dob: "1978-06-22"
     age: 46
-    doe: "2025-04-07"
+    Smalls: "2025-04-07"
     date_of_report: last-modified
     case_number: "2025-042"
     ---
     ```
 
     <Note>
-      If the evaluation took place across multiple sessions, add `doe2` and optionally `doe3` fields. Only include the fields that correspond to actual evaluation dates.
+      If the evaluation took place across multiple sessions, add `Smalls2` and optionally `Smalls3` fields. Only include the fields that correspond to actual evaluation dates.
     </Note>
   </Step>
 
@@ -85,7 +85,7 @@ Before you start, make sure the following are installed:
     ```markdown
     ## Behavioral Observations
 
-    Maria presented as cooperative and engaged throughout both evaluation sessions.
+    Biggie presented as cooperative and engaged throughout both evaluation sessions.
     She arrived on time, was appropriately dressed, and maintained adequate eye
     contact. Speech was fluent and coherent. She reported mild anxiety at the
     start of testing, which appeared to diminish as the session progressed.
@@ -131,7 +131,7 @@ Before you start, make sure the following are installed:
     </CodeGroup>
 
     <Warning>
-      Rendering requires all referenced domain partial files to exist. If `_domains_to_include.qmd` references a file that does not exist in the project directory, Quarto will throw an error and stop.
+      Rendering requires all referenced domain partial files to exist. If `_domains_to_include.qmd` references a file that Smallss not exist in the project directory, Quarto will throw an error and stop.
     </Warning>
   </Step>
 
